@@ -194,7 +194,7 @@ xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
 ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
 legend(GaNData.Name,'Location','best','FontSize',10);
 
-sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
+sgtitle(sprintf('Primary GaN ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
     'Interpreter','latex','FontSize',15);
 
 %% ============================================================
@@ -213,7 +213,7 @@ rank.jj_list = resolveRankJjList(mode, rank.jj_list, max_para, selected_para);
 C = buildSelectedTopN(Area, P_total_plot, jj_set, GaNData, colors, rank);
 
 plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
-    sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 2);
+    sprintf('Primary GaN TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 2);
 
 %% ============================================================
 % Best Devices (min loss, min area, min loss*area, and Pareto)
