@@ -1,7 +1,7 @@
-% Test Script: calculate_VIRT_design.m
+% Test Script: optimize_VIRT.m
 %
 % Author:  Julia Estrin
-% Date:    02-12-2026
+% Date:    02-17-2026
 %
 % Description:
 %   Defines design parameters for a 6.25 kW VIRT transformer and calls
@@ -26,8 +26,6 @@ sigma_cu = 1 / rho_cu;          % [S/m]   Conductivity at 100°C
 u0       = 4 * pi * 1e-7;       % [H/m]   Permeability of free space
 
 %% Transformer Fixed Parameters
-Pv_max   = 100e3;               % [W/m^3] Maximum allowable volumetric core loss
-w_height = 25e-3;               % [m]     Winding window height
 w_b      = 4e-3;                % [m]     Winding window breadth/depth
 t_cu_pri = 2 * 35e-6;           % [m]     Primary copper thickness (2 oz)
 t_cu_sec = 2 * 35e-6;           % [m]     Secondary copper thickness (2 oz)
@@ -49,38 +47,20 @@ design_params = struct( ...
     't_cu_sec', t_cu_sec  ...
 );
 
-%% Run Design
-result = calculate_VIRT_design(Pv_max, w_height, design_params);
+%% Optimization Sweep
+Pv_max_list   = linspace(100e3, 500e3, 50);     % [W/m^3] core loss density sweep
+w_height_list = linspace(5e-3, 50e-3, 50);     % [m]     window height sweep
+opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
-%% Display Results
-fprintf('\n===== VIRT Design Results =====\n');
-fprintf('\n-- Flux Density --\n');
-fprintf('  Bmax:           %.4f mT\n',   result.Bmax * 1e3);
+%% Display Optimal Design Results
+fprintf('\n===== Optimal Design Results =====\n');
+fprintf('  Pv_max_opt:     %.2f kW/m^3\n', opt.Pv_max_opt   / 1e3);
+fprintf('  w_height_opt:   %.2f mm\n',      opt.w_height_opt * 1e3);
+fprintf('  Bmax_opt:       %.4f T\n',        opt.Bmax_opt);
+fprintf('  P_total_min:    %.4f W\n',        opt.P_total_min);
+fprintf('  P_core_min:     %.4f W\n',        opt.P_core_min);
+fprintf('  P_copper_min:   %.4f W\n',        opt.P_copper_min);
+fprintf('==================================\n\n');
 
-fprintf('\n-- Core Geometry --\n');
-fprintf('  Ac:             %.4f mm^2\n', result.Ac           * 1e6);
-fprintf('  r_centerpost:   %.4f mm\n',  result.r_centerpost * 1e3);
-fprintf('  w_core:         %.4f mm\n',  result.w_core       * 1e3);
-fprintf('  l_leg:          %.4f mm\n',  result.l_leg        * 1e3);
-fprintf('  l_core:         %.4f mm\n',  result.l_core       * 1e3);
-fprintf('  h_core:         %.4f mm\n',  result.h_core       * 1e3);
-fprintf('  V_total:        %.4f cm^3\n', result.V_total     * 1e6);
-fprintf('  A_footprint:    %.4f cm^2\n', result.A_footprint * 1e4);
-
-fprintf('\n-- Winding Geometry --\n');
-fprintf('  l_winding:      %.4f mm\n',  result.l_winding * 1e3);
-fprintf('  w_winding:      %.4f mm\n',  result.w_winding * 1e3);
-
-fprintf('\n-- Resistance --\n');
-fprintf('  Rdc_pri:        %.4f mOhm\n', result.Rdc_pri * 1e3);
-fprintf('  Rdc_sec:        %.4f mOhm\n', result.Rdc_sec * 1e3);
-
-fprintf('\n-- Losses --\n');
-fprintf('  P_core:         %.4f W\n',   result.P_core);
-fprintf('  P_pri:          %.4f W\n',   result.P_pri);
-fprintf('  P_sec:          %.4f W\n',   result.P_sec);
-fprintf('  P_total:        %.4f W\n',   result.P_total);
-fprintf('================================\n\n');
-
-%% 3D Visualization
-core3Dfigure(result, Pv_max, w_height);
+%% 3D Visualization of Optimal Design
+core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt);
