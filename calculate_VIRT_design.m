@@ -94,7 +94,7 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     %% Winding Geometry
     % Square winding footprint for this topology (l_winding == w_winding)
     l_winding     = 2 * r_centerpost + 2 * w_height;               % [m]   winding outer length
-    w_winding     = 2 * r_centerpost + 2 * w_height;               % [m]   winding outer width
+    w_winding     = 2 * r_centerpost + 1/2 * 2 * w_height;               % [m]   winding outer width
 
     %% Core Cross-Section Areas
     A_centerpost  = pi * r_centerpost^2;                            % [m^2]

@@ -48,9 +48,12 @@ design_params = struct( ...
 );
 
 %% Optimization Sweep
-Pv_max_list   = linspace(100e3, 500e3, 50);     % [W/m^3] core loss density sweep
-w_height_list = linspace(5e-3, 50e-3, 50);     % [m]     window height sweep
+Pv_max_list   = linspace(50e3, 500e3, 50);     % [W/m^3] core loss density sweep
+w_height_list = linspace(5e-3, 5*w_b, 50);     % [m]     window height sweep
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
+
+Cps = calculcate_Cps_3Layer(opt.opt_design.l_winding, opt.opt_design.w_winding, opt.opt_design.w_core); 
+f_res = 1/(2*pi*sqrt(Cps * Lu))
 
 %% Display Optimal Design Results
 fprintf('\n===== Optimal Design Results =====\n');
@@ -60,7 +63,9 @@ fprintf('  Bmax_opt:       %.4f T\n',        opt.Bmax_opt);
 fprintf('  P_total_min:    %.4f W\n',        opt.P_total_min);
 fprintf('  P_core_min:     %.4f W\n',        opt.P_core_min);
 fprintf('  P_copper_min:   %.4f W\n',        opt.P_copper_min);
+fprintf('  f_res:          %.4f MHz\n',        f_res*1e-6);
 fprintf('==================================\n\n');
+
 
 %% 3D Visualization of Optimal Design
 core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt);
