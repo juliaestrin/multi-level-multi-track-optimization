@@ -1,6 +1,6 @@
-out1 = analyzePriGaNSwitches(6.25e3, 1000e3, 21.4142, 1, 10, [4 6 8], [4 6], 50);
+%out1 = analyzePriGaNSwitches(6.25e3, 1000e3, 21.4142, 1, 10, [4 6 8], [4 6], 500);
 
-%out2 = analyzeSecSwitches(6.25e3, 1000e3, 1, 10, [4 6 8], [4 6]);
+out2 = analyzeSecSwitches(6.25e3, 1000e3, 1, 10, [4 6 8], [4 6]);
 
 function out = analyzePriGaNSwitches(Power, f_sw_typ, I_r, mode, max_para, selected_para, compare_list, max_total_loss, dataFile)
 % Fig 1: ALL devices  -> (Loss vs jj) + (Tj vs jj)
@@ -704,11 +704,10 @@ function best = pickBestDevices(AreaFull, LossFull, LossAreaFull, jj_set, compar
     jj_abs = compare_list(colLocal);
     best.minLossArea = packOneLocal(dev, jj_abs, compare_list, Loss, Area, SecData);
 
-    % ---------- 4) Pareto front ----------
+     % ---------- 4) Pareto front ----------
     [devIdx, colIdx] = find(feas);
     if isempty(devIdx)
-        best.pareto = struct('device_index',[], 'device_name',string.empty, ...
-            'jj',[], 'area_mm2',[], 'loss_W',[], 'loss_area_W_mm2_product',[]);
+        best.pareto = struct([]);   % empty struct array
         best.compare_list = compare_list;
         return;
     end
@@ -717,15 +716,47 @@ function best = pickBestDevices(AreaFull, LossFull, LossAreaFull, jj_set, compar
     loss_vec = Loss(sub2ind(size(Loss), devIdx, colIdx));
     jj_vec   = compare_list(colIdx);
 
-    pareto_result = computeParetoFront(area_vec, loss_vec);
+    pareto_mask = computeParetoFront(area_vec, loss_vec);
 
-    best.pareto.device_index = devIdx(pareto_result);
-    best.pareto.device_name  = string(SecData.Name(best.pareto.device_index));
-    best.pareto.jj           = jj_vec(pareto_result);
-    best.pareto.area_mm2     = area_vec(pareto_result);
-    best.pareto.loss_W       = loss_vec(pareto_result);
-    best.pareto.loss_area_W_mm2_product = best.pareto.area_mm2 .* best.pareto.loss_W;
+    % Indices of Pareto-optimal points in the (area_vec, loss_vec) list
+    pDevIdx = devIdx(pareto_mask);
+    pColIdx = colIdx(pareto_mask);
 
+    % Build struct array: one struct per Pareto point
+    paretoList = repmat(struct( ...
+        'device_index', [], ...
+        'device_name',  "", ...
+        'jj',           [], ...
+        'area_mm2',     [], ...
+        'loss_W',       [], ...
+        'loss_area_W_mm2_product', []), ...
+        numel(pDevIdx), 1);
+
+    for m = 1:numel(pDevIdx)
+        di = pDevIdx(m);
+        cj = pColIdx(m);
+
+        jj_abs = compare_list(cj);
+        a = Area(di, cj);
+        l = Loss(di, cj);
+
+        paretoList(m).device_index = di;
+        paretoList(m).device_name  = string(SecData.Name(di));
+        paretoList(m).jj           = jj_abs;
+        paretoList(m).area_mm2     = a;
+        paretoList(m).loss_W       = l;
+        paretoList(m).loss_area_W_mm2_product = a * l;
+    end
+
+    % Optional: sort Pareto list by area (then loss) to make it nicer to read
+    if ~isempty(paretoList)
+        A = [paretoList.area_mm2].';
+        L = [paretoList.loss_W].';
+        [~, ord] = sortrows([A L], [1 2]);
+        paretoList = paretoList(ord);
+    end
+
+    best.pareto = paretoList;
     best.compare_list = compare_list;
 end
 
