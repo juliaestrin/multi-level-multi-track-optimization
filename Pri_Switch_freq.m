@@ -24,9 +24,10 @@ loss_limit = 500;
 
 f_list = [1000e3, 900e3, 800e3];
 
-%% ---- Run analyzeSecSwitches ----
+%% ---- Run analyzePriSwitches ----
 outs = cell(size(f_list));
 for k = 1:numel(f_list)
+    % Calculate the resonating current for different freq
     I_r = calcIr(f_list(k), Power);
     outs{k} = analyzePriSwitches( ...
         Power, f_list(k), I_r.I_r, mode, max_para, selected_para, compare_list, loss_limit, ganFile, sicFile);
@@ -40,10 +41,14 @@ ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
 % title(sprintf('Pareto designs across $f_{sw}$ (P=%.2f kW)', Power/1e3), ...
 %     'Interpreter','latex','FontSize',15);
 
-cmap = lines(numel(f_list));   % color for each frequency
-marker_by_jj = makeMarkerMap();
+% Generate distinct colors for different frequencies
+cmap = lines(numel(f_list));
+
+% Get markers for different number of parallel switches
+marker_by_jj = makeMarkerMap(); 
 msize = 90;
 
+% Track jj: the number of parallel switches
 jj_seen = [];
 
 for k = 1:numel(f_list)
@@ -55,7 +60,8 @@ for k = 1:numel(f_list)
 
         jj = paretoList(m).jj;
 
-        mk = 'o';
+        % Choose marker shape
+        mk = 'o'; % default
         if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
             mk = marker_by_jj{jj};
         end
@@ -69,24 +75,32 @@ for k = 1:numel(f_list)
             'filled', ...
             'LineWidth', 1.2);
 
-        jj_seen(end+1) = jj;
+        % Record jj
+        jj_seen(end+1) = jj; % append current jj to the list
     end
 end
 
+% Find unique elements 
 jj_seen = unique(jj_seen,'stable');
 
 %% ============================================================
 %               Build Combined Legend
 %% ============================================================
 
+% Stores graphics handles. Lengend icons
 h_leg = gobjects(0);
+
+% Stores legend lables. 
 lab_leg = strings(0);
 
-% ---------- Frequency block (COLOR meaning) ----------
+% ---------- Frequency block ----------
 for k = 1:numel(f_list)
+    % Create invisible scatter for legend entry
     h = scatter(NaN, NaN, msize, cmap(k,:), 's', ...
-        'filled', 'LineWidth', 1.2);   % square marker for legend clarity
+        'filled', 'LineWidth', 1.2); 
+    % Append the created legend to the end
     h_leg(end+1) = h; 
+    % Append the legend label to the end 
     lab_leg(end+1) = sprintf('$f_{\\mathrm{sw}}$ = %.0f kHz', f_list(k)/1e3);
 end
 
@@ -94,10 +108,11 @@ end
 %h_leg(end+1) = plot(NaN,NaN,'w.');
 %lab_leg(end+1) = " ";  % blank line
 
-% ---------- Parallel number block (MARKER meaning) ----------
+% ---------- Parallel number block ----------
 for i = 1:numel(jj_seen)
     jj = jj_seen(i);
 
+    % Choose marker shape
     mk = 'o';
     if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
         mk = marker_by_jj{jj};
@@ -116,6 +131,8 @@ legend(h_leg, lab_leg, ...
     'Location','best');
 
 function out = calcIr(f_sw_typ, Power)
+% With fixed fn range, Ln, and Qe_max, I_r remains the same 
+% for varying switching frequency. 
     arguments
         f_sw_typ (1,1) double {mustBePositive}
         Power    (1,1) double {mustBePositive}
@@ -191,11 +208,9 @@ function out = analyzePriSwitches(Power, f_sw_typ, I_r, mode, max_para, selected
 %   - SiC-only  (ganFile empty)
 %   - GaN+SiC   (both provided)
 %
-% Uses numeric column indexing, with separate column maps for GaN vs SiC.
 % Plot style:
 %   - GaN markers filled
 %   - SiC markers empty
-% Helper functions are minimally changed and remain compatible with your secondary-side code.
 
 %% ===================== Defaults =====================
 if nargin < 10, sicFile = 'SiC Data.xlsx'; end
@@ -217,9 +232,9 @@ else
     error('mode must be 1 or 2');
 end
 
-%% ===================== Read tables (flexible: GaN-only / SiC-only / both) =====================
-tbls = {};
-techs = string.empty(1,0);
+%% ===================== Read tables (GaN-only / SiC-only / both) =====================
+tbls = {}; % Create an empty cell array 
+techs = string.empty(1,0); % Create an empty string array 
 
 if ~isempty(ganFile)
     GaNData = readtable(ganFile);
@@ -233,6 +248,9 @@ if ~isempty(sicFile)
     techs(end+1) = "SiC";
 end
 
+% ---- tbls{1} = GaNData; tbls{2} = SiCData
+% ---- techs = ["GaN", "SiC"]
+
 if isempty(tbls)
     error('You must provide at least one data file: ganFile or sicFile.');
 end
@@ -244,6 +262,10 @@ for t = 1:numel(tbls)
 end
 
 % Meta table (global index -> which table + row)
+% Tech: GaN or SiC
+% Name: Device Name
+% SourceID: which table in tbls
+% RowInSource: Row number inside that table
 Meta = table('Size',[n_sw 4], ...
     'VariableTypes',["string","string","double","double"], ...
     'VariableNames',["Tech","Name","SourceID","RowInSource"]);
@@ -266,6 +288,7 @@ end
 %% ===================== Column mapping by index =====================
 % NOTE: These indices are relative to each source table's column order.
 
+% Create a struct
 % GaN indices
 idx.GaN.Rth_jc = 4;
 idx.GaN.Eloss  = 6;
@@ -531,6 +554,7 @@ best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list,
 out = struct();
 out.Power         = Power;
 out.f_sw_typ      = f_sw_typ;
+out.I_r           = I_r;
 out.mode          = mode;
 out.max_para      = max_para;
 out.selected_para = selected_para;
