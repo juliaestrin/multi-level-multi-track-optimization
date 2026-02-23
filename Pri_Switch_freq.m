@@ -1,18 +1,189 @@
-% Example calls:
-% 1) GaN only:
-% out = analyzePriSwitches(6.25e3, 1000e3, 21.4142, 2, 10, ...
-%     [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 500, ...
-%     'GaN Data.xlsx', []);
-%
-% 2) SiC only:
-% out = analyzePriSwitches(6.25e3, 1000e3, 21.4142, 2, 10, ...
-%     [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 500, ...
-%     [], 'SiC Data.xlsx');
-%
-% 3) Both:
-out = analyzePriSwitches(6.25e3, 800e3, 21.4142, 2, 10, ...
-    [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 500, ...
-    'GaN Data.xlsx', 'SiC Data.xlsx');
+%% ============================================================
+%  Compare Pareto across frequencies
+%  x: area
+%  y: loss
+%  color  -> frequency
+%  marker -> parallel number (jj)
+%  Legend: colors block + markers block
+%% ============================================================
+
+clear; clc;
+
+%% ---- User settings ----
+Power = 6.25e3;
+
+mode = 1;
+max_para = 10;
+selected_para = [4 6 8];
+
+compare_list = [1 2 3 4 5 6 7 8];
+ganFile = 'GaN Data.xlsx';
+sicFile = 'SiC Data.xlsx';
+
+loss_limit = 500;
+
+f_list = [1000e3, 900e3, 800e3];
+
+%% ---- Run analyzeSecSwitches ----
+outs = cell(size(f_list));
+for k = 1:numel(f_list)
+    I_r = calcIr(f_list(k), Power);
+    outs{k} = analyzePriSwitches( ...
+        Power, f_list(k), I_r.I_r, mode, max_para, selected_para, compare_list, loss_limit, ganFile, sicFile);
+end
+
+%% ---- Plot Pareto points ----
+figure(10); clf; hold on; grid on;
+
+xlabel('Total Area [mm$^2$]','Interpreter','latex','FontSize',15);
+ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+% title(sprintf('Pareto designs across $f_{sw}$ (P=%.2f kW)', Power/1e3), ...
+%     'Interpreter','latex','FontSize',15);
+
+cmap = lines(numel(f_list));   % color for each frequency
+marker_by_jj = makeMarkerMap();
+msize = 90;
+
+jj_seen = [];
+
+for k = 1:numel(f_list)
+
+    paretoList = outs{k}.best.pareto;
+    if isempty(paretoList), continue; end
+
+    for m = 1:numel(paretoList)
+
+        jj = paretoList(m).jj;
+
+        mk = 'o';
+        if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+            mk = marker_by_jj{jj};
+        end
+
+        scatter( ...
+            paretoList(m).area_mm2, ...
+            paretoList(m).loss_W, ...
+            msize, ...
+            cmap(k,:), ...
+            mk, ...
+            'filled', ...
+            'LineWidth', 1.2);
+
+        jj_seen(end+1) = jj;
+    end
+end
+
+jj_seen = unique(jj_seen,'stable');
+
+%% ============================================================
+%               Build Combined Legend
+%% ============================================================
+
+h_leg = gobjects(0);
+lab_leg = strings(0);
+
+% ---------- Frequency block (COLOR meaning) ----------
+for k = 1:numel(f_list)
+    h = scatter(NaN, NaN, msize, cmap(k,:), 's', ...
+        'filled', 'LineWidth', 1.2);   % square marker for legend clarity
+    h_leg(end+1) = h; 
+    lab_leg(end+1) = sprintf('$f_{\\mathrm{sw}}$ = %.0f kHz', f_list(k)/1e3);
+end
+
+% Spacer (optional clean separation)
+%h_leg(end+1) = plot(NaN,NaN,'w.');
+%lab_leg(end+1) = " ";  % blank line
+
+% ---------- Parallel number block (MARKER meaning) ----------
+for i = 1:numel(jj_seen)
+    jj = jj_seen(i);
+
+    mk = 'o';
+    if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+        mk = marker_by_jj{jj};
+    end
+
+    h = scatter(NaN, NaN, msize, 'k', mk, ...
+        'filled', 'LineWidth', 1.2);
+
+    h_leg(end+1) = h; 
+    lab_leg(end+1) = sprintf('%d-parallel', jj);
+end
+
+legend(h_leg, lab_leg, ...
+    'Interpreter','latex', ...
+    'FontSize',10, ...
+    'Location','best');
+
+function out = calcIr(f_sw_typ, Power)
+    arguments
+        f_sw_typ (1,1) double {mustBePositive}
+        Power    (1,1) double {mustBePositive}
+    end
+
+    % Parameters (fixed)
+    Vout = 48;
+    N_tr = 2;
+    N_x  = 4;
+    N_s  = 1;
+    L_n  = 5;
+    Q_e_max = 0.42;
+    f_max_scale = 1.25;
+    f_min_scale = 0.75;
+
+    % Frequency range
+    f_sw_max = f_sw_typ * f_max_scale;
+    f_sw_min = f_sw_typ * f_min_scale;
+
+    % Load and equivalent resistance
+    R_load = (Vout^2) / Power;
+    R_e = N_tr * (N_x/N_s)^2 * (8/pi^2) * R_load;
+
+    % Resonant components
+    C_r = 1 / (2*pi*Q_e_max*f_sw_typ*R_e);
+    L_r = 1 / (C_r*(2*pi*f_sw_typ)^2);
+    L_m = L_n * L_r;
+
+    % RMS currents
+    V_oe = (4/pi) * (N_x/N_s) * Vout / sqrt(2);      % RMS output-equivalent voltage
+    I_m  = V_oe / ((2*pi*f_sw_min) * L_m);           % RMS magnetizing current
+
+    I_oe = (pi/2) * (N_s/N_x) * (1/N_tr) * ...
+           (Vout/R_load) * (1/sqrt(2));              % RMS output-equivalent current
+
+    I_r = sqrt(I_m^2 + I_oe^2);
+
+    % Pack outputs
+    out = struct( ...
+        'f_sw_typ', f_sw_typ, ...
+        'f_sw_max', f_sw_max, ...
+        'f_sw_min', f_sw_min, ...
+        'R_load',   R_load, ...
+        'R_e',      R_e, ...
+        'C_r',      C_r, ...
+        'L_r',      L_r, ...
+        'L_m',      L_m, ...
+        'I_m',      I_m, ...
+        'I_oe',     I_oe, ...
+        'I_r',      I_r);
+end
+
+%% ============================================================
+% Marker mapping
+%% ============================================================
+function marker_by_jj = makeMarkerMap()
+    marker_by_jj = cell(1,100);
+    marker_by_jj{1}  = 'v';
+    marker_by_jj{2}  = '>';
+    marker_by_jj{3}  = 'd';
+    marker_by_jj{4}  = 'o';
+    marker_by_jj{5}  = '^';
+    marker_by_jj{6}  = 'p';
+    marker_by_jj{7}  = 's';
+    marker_by_jj{8}  = 'h';
+    marker_by_jj{9}  = '<';
+    marker_by_jj{10} = 'x';
+end
 
 function out = analyzePriSwitches(Power, f_sw_typ, I_r, mode, max_para, selected_para, compare_list, max_total_loss, ganFile, sicFile)
 % Supports:
