@@ -53,7 +53,7 @@ w_height_list = linspace(5e-3, 5*w_b, 50);     % [m]     window height sweep
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
 Cps = calculcate_Cps_3Layer(opt.opt_design.l_winding, opt.opt_design.w_winding, opt.opt_design.w_core); 
-f_res = 1/(2*pi*sqrt(Cps * Lu))
+f_res = 1/(2*pi*sqrt(Cps * Lu));
 
 %% Display Optimal Design Results
 fprintf('\n===== Optimal Design Results =====\n');
