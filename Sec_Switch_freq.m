@@ -16,7 +16,7 @@ mode = 1;
 max_para = 10;
 selected_para = [4 6 8];
 
-compare_list = [4 6];
+compare_list = [4 8];
 dataFile = 'Sec Data.xlsx';
 
 f_list = [1000e3, 900e3, 800e3];
@@ -322,7 +322,7 @@ sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1
 % ---- Top-N selection ----
 rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
 rank.N_keep  = 20;        % number of devices to keep
-rank.jj_list = [4 6];   % markers used on RIGHT tile only
+rank.jj_list = [4 8];   % markers used on RIGHT tile only
 
 % Apply mode rule to jj_list (overlap behavior)
 rank.jj_list = resolveRankJjList(mode, rank.jj_list, max_para, selected_para);
