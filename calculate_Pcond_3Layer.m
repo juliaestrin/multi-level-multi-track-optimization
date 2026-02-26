@@ -50,6 +50,6 @@ function [P_pri, P_sec] = calculate_Pcond_3Layer(I, f, Rdc_pri, Rdc_sec, t_cu_pr
 
     % --- Conduction losses ---
     P_pri   = 4   * delta_pri * Rdc_pri * I^2 * F_pri;
-    P_sec   = 8   * delta_sec * Rdc_sec * I^2 * (2*F_sec - G_sec);
+    P_sec   = 1/2  * delta_sec * Rdc_sec * I^2 * (16 * F_sec - 8 * G_sec);
 
 end
