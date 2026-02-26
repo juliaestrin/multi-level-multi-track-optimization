@@ -102,7 +102,7 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     A_centerpost  = pi * r_centerpost^2;                            % [m^2]
     A_leg         = l_leg  * w_core;                                % [m^2]
     A_yoke        = h_yoke * w_core;                                % [m^2]
-    A_footprint   = w_core * l_core;                                % [m^2] PCB footprint
+    A_footprint   = w_winding * l_core;                                % [m^2] PCB footprint
 
     %% Core Section Volumes
     V_centerpost  = A_centerpost * params.w_b;                      % [m^3] cylindrical center post
