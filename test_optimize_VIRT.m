@@ -27,7 +27,7 @@ rho_cu   = 2.2e-8;              % [Ohm·m] Resistivity at 100°C
 sigma_cu = 1 / rho_cu;          % [S/m]   Conductivity at 100°C
 u0       = 4 * pi * 1e-7;       % [H/m]   Permeability of free space
 
-stackup = '8layer_interleaved'; 
+stackup = '5layer'; 
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
