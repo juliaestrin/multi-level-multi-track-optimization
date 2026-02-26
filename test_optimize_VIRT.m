@@ -27,7 +27,7 @@ rho_cu   = 2.2e-8;              % [Ohm·m] Resistivity at 100°C
 sigma_cu = 1 / rho_cu;          % [S/m]   Conductivity at 100°C
 u0       = 4 * pi * 1e-7;       % [H/m]   Permeability of free space
 
-stackup = '5layer'; 
+stackup = '8layer_interleaved'; 
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
@@ -61,7 +61,7 @@ design_params = struct( ...
 );
 
 %% Optimization Sweep
-Pv_max_list   = linspace(50e3, 500e3, 50);     % [W/m^3] core loss density sweep
+Pv_max_list   = linspace(50e3, 500e3, 500);     % [W/m^3] core loss density sweep
 w_height_list = linspace(5e-3, w_h_max, 50);     % [m]     window height sweep
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 

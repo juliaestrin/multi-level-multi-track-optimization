@@ -77,7 +77,9 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
 
     %% Core Geometry
     % Center post sized to satisfy inductance requirement at Bmax
-    Ac            = params.Lu * params.I / (params.Np * Bmax);     % [m^2] required center leg area
+    % Factor of 2 for 2 Lu's in series
+    % 3/2 to account for MMF from secondaries 
+    Ac            =  2 * 3/2 * params.Lu * params.I / (params.Np * Bmax);     % [m^2] required center leg area
     r_centerpost  = sqrt(Ac / pi);                                  % [m]   center post radius (cylindrical)
     w_core        = 2 * r_centerpost;                               % [m]   core width = center post diameter
 
