@@ -79,7 +79,7 @@ Cps = calculcate_Cps_3Layer(opt.opt_design.l_winding, opt.opt_design.w_winding, 
 f_res = 1/(2*pi*sqrt(Cps * Llk));
 
 % Efficiency Calculation
-eff = calcEfficiency(out1, out2, "pareto", "minLoss", 6.25e3, opt.P_total_min, 2000);
+eff = calcEfficiency(out1, out2, "pareto", "minLoss", 6.25e3, opt.P_total_min, opt.opt_design.A_footprint*(10^6));
 
 %% ===================== SWICTH ANALYSIS =====================
 
