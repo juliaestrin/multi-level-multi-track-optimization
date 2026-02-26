@@ -11,15 +11,15 @@
 %     [], 'SiC Data.xlsx');
 %
 % 3) Both:
-out1 = analyzePriSwitches(3e3, 1000e3, 21.4142, 2, 10, ...
+out1 = analyzePriSwitches(6.25e3, 1000e3, 21.4142, 2, 10, ...
     [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 500, ...
     'GaN Data.xlsx', 'SiC Data.xlsx');
 %
 % Secondary Side
-out2 = analyzeSecSwitches(3e3, 1000e3, 1, 10, [4 6 8], [4 6]);
+out2 = analyzeSecSwitches(6.25e3, 1000e3, 1, 10, [4 6 8], [4 6]);
 
 % Efficiency Calculation
-eff = calcEfficiency(out1, out2, "pareto", "minLoss", 3e3, 20);
+eff = calcEfficiency(out1, out2, "pareto", "minLoss", 6.25e3, 20);
 
 %% ===================== SWICTH ANALYSIS =====================
 
@@ -650,11 +650,11 @@ end
 
 %% ===================== EFFICIENCY CALCULATION =====================
 
-function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_loss, marker_by_jj, figNum)
+function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_loss, other_area, marker_by_jj, figNum)
 % Efficiency Calculation
-    if nargin < 6 || isempty(other_loss), other_loss = 0; end
-    if nargin < 7 || isempty(marker_by_jj), marker_by_jj = makeMarkerMap(); end
-    if nargin < 8 || isempty(figNum), figNum = 10; end
+    if nargin < 7 || isempty(other_loss), other_loss = 0; end
+    if nargin < 8 || isempty(marker_by_jj), marker_by_jj = makeMarkerMap(); end
+    if nargin < 9 || isempty(figNum), figNum = 10; end
 
     if ~isstring(modePri) || ~isscalar(modePri) || ~isstring(modeSec) || ~isscalar(modeSec)
         error('modePri and modeSec must be string scalars (e.g., "minLoss", "pareto").');
@@ -673,7 +673,7 @@ function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_
         secOne = SecOut.best.(modeSec);
 
         loss_total = priOne.loss_W + secOne.loss_W + other_loss;
-        area_total = priOne.area_mm2 + secOne.area_mm2;
+        area_total = priOne.area_mm2 + secOne.area_mm2 + other_area;
 
         eta = (Power - loss_total) / Power;
 
@@ -702,7 +702,7 @@ function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_
         pts = repmat(struct('area_mm2',[],'loss_W',[],'eta',[],'jj',[],'pri',[],'sec',[]), N, 1);
         for k = 1:N
             loss_total = priCands(k).loss_W + secFixed.loss_W + other_loss;
-            area_total = priCands(k).area_mm2 + secFixed.area_mm2;
+            area_total = priCands(k).area_mm2 + secFixed.area_mm2 + other_area;
             eta = (Power - loss_total) / Power;
 
             pts(k).loss_W   = loss_total;
