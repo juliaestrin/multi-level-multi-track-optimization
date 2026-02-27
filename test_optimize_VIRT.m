@@ -2,13 +2,17 @@
 %
 % Author:  Julia Estrin
 % Date:    02-17-2026
+% Updated: 02-27-2026
 %
+
 % Description:
 %   Defines design parameters for a 6.25 kW VIRT transformer and calls
 %   calculate_VIRT_design to evaluate core geometry, core loss, and AC
 %   copper loss. Results are printed to the command window.
 
 %% Operating Point
+Vo = 48; 
+nt = 2; 
 Lu  = 0.63e-6 * 5;             % [H]  Inductance requirement for 6.25 kW
 Llk = 0.63e-6; 
 I   = 21.4 * sqrt(2);          % [A]  Peak primary current for 6.25 kW
@@ -27,7 +31,7 @@ rho_cu   = 2.2e-8;              % [Ohm·m] Resistivity at 100°C
 sigma_cu = 1 / rho_cu;          % [S/m]   Conductivity at 100°C
 u0       = 4 * pi * 1e-7;       % [H/m]   Permeability of free space
 
-stackup = '8layer_interleaved'; 
+stackup = '5layer'; 
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
@@ -44,6 +48,8 @@ t_cu_sec = 2 * 35e-6;           % [m]     Secondary copper thickness (2 oz)
 
 %% Package Design Parameters
 design_params = struct( ...
+    'Vo' , Vo, ...
+    'nt', nt, ...
     'Lu',       Lu,       ...
     'I',        I,        ...
     'f',        f,        ...
@@ -77,6 +83,8 @@ fprintf('  P_total_min:    %.4f W\n',        opt.P_total_min);
 fprintf('  P_core_min:     %.4f W\n',        opt.P_core_min);
 fprintf('  P_copper_min:   %.4f W\n',        opt.P_copper_min);
 fprintf('  f_res:          %.4f MHz\n',        f_res*1e-6);
+fprintf('  l_gap:          %.4f mm\n',        opt.opt_design.lg*1e3);
+
 fprintf('==================================\n\n');
 
 

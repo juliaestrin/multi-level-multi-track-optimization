@@ -66,7 +66,9 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     %% Parameter Sweep
     for i = 1:n_Pv
         for j = 1:n_wh
-            des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+           % des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+           des = calculate_VIRT_design_02_27_2026(Pv_max_list(i), w_height_list(j), design_params);
+
 
             P_core_array(i,j)  = des.P_core;
             P_pri_array(i,j)   = des.P_pri;
@@ -90,7 +92,7 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     P_copper_min  = P_pri_array(idx_Pv_opt, idx_wh_opt) + P_sec_array(idx_Pv_opt, idx_wh_opt);
 
     % Re-run design at optimum to get full geometry and loss breakdown
-    opt_design = calculate_VIRT_design(Pv_max_opt, w_height_opt, design_params);
+    opt_design = calculate_VIRT_design_02_27_2026(Pv_max_opt, w_height_opt, design_params);
 
     %% Package Results
     result = struct( ...
