@@ -65,9 +65,6 @@ Pv_max_list   = linspace(50e3, 500e3, 500);     % [W/m^3] core loss density swee
 w_height_list = linspace(5e-3, w_h_max, 50);     % [m]     window height sweep
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
-Cps = calculcate_Cps_3Layer(opt.opt_design.l_winding, opt.opt_design.w_winding, opt.opt_design.w_core); 
-f_res = 1/(2*pi*sqrt(Cps * Llk));
-
 %% Display Optimal Design Results
 fprintf('\n===== Optimal Design Results =====\n');
 fprintf('  Pv_max_opt:     %.2f kW/m^3\n', opt.Pv_max_opt   / 1e3);
