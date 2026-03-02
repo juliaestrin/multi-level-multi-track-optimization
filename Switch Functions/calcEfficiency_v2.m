@@ -150,7 +150,7 @@ end
 
 
 function plotAreaLoss(pts, paretoSide, marker_by_jj, figNum, useIn2)
-    figure(); clf;
+    figure(figNum); clf;
     hold on; grid on;
 
     N = numel(pts);

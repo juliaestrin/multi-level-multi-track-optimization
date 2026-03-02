@@ -35,7 +35,7 @@ Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
 % --- Transformer Design Specs ---
 material_name = 'F80';      % Core: 'ML91S', 'F80', '3F46'
-w_h_max       = 20e-3;     % [m]    Max window height
+w_h_max       = 100e-3;     % [m]    Max window height
 w_scale       = 1;        % [-]    Winding width scale 
 stackup       = '5layer';   % '3layer','5layer','6layer_interleaved', etc.
 
@@ -94,8 +94,8 @@ design_params = struct( ...
 );
 
 % Define sweep ranges
-Pv_max_list   = linspace(50e3, 500e3, 500);     % [W/m^3]
-w_height_list = linspace(5e-3, w_h_max, 50);    % [m]
+Pv_max_list   = linspace(50e3, 1000e3, 1000-50+1);     % [W/m^3]
+w_height_list = linspace(5e-3, w_h_max, (w_h_max*1e3-5)*2+1);    % [m]
 
 % Run optimization
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
