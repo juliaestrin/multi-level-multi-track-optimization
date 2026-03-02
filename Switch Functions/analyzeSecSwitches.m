@@ -162,7 +162,7 @@ marker_by_jj{10} = 'x';
 %% ============================================================
 % FIGURE 1: All devices
 %% ============================================================
-figure(3); clf;
+figure(); clf;
 tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
 
 nexttile; hold on; grid on;

@@ -268,7 +268,7 @@ marker_by_jj{10} = 'x';
 %% ============================================================
 % FIGURE 1: All devices  (GaN filled, SiC empty)
 %% ============================================================
-figure(1); clf;
+figure(); clf;
 tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
 
 nexttile; hold on; grid on;

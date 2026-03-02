@@ -82,7 +82,7 @@ function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_
     effOut.paretoSide = paretoSide;
 
     % ===== Plot: Area vs Loss with jj markers + efficiency text =====
-    figure(figNum); clf;
+    figure(); clf;
     hold on; grid on;
 
     msize = 90;
@@ -124,6 +124,69 @@ function effOut = calcEfficiency(PriOut, SecOut, modePri, modeSec, Power, other_
     end
 
     xlabel('Total Area [mm$^2$]','Interpreter','latex','FontSize',15);
+    ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+    % title(sprintf('Area vs Loss (P=%.2f kW)', Power/1e3), ...
+    %     'Interpreter','none');
+
+    jjVals = unique([pts.jj]);
+    h = gobjects(numel(jjVals),1);
+    for i = 1:numel(jjVals)
+        jj = jjVals(i);
+        mk = 'o';
+        if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+            mk = marker_by_jj{jj};
+        end
+        h(i) = scatter(nan, nan, msize, 'Marker', mk, ...
+            'MarkerFaceColor', 'k', ...
+            'MarkerEdgeColor','k',...
+            'LineWidth', 1.2);
+    end
+    legend(h, compose('%d-parallel', jjVals), ...
+        'Location','best','Orientation','horizontal','FontSize',10);
+
+        % ===== Plot: Area vs Loss with jj markers + efficiency text =====
+    figure(); clf;
+    hold on; grid on;
+
+    msize = 90;
+    N = numel(pts);
+    colors = lines(N);
+
+    devNames = strings(N,1); % Extract device names (pareto side device)
+    
+    for k = 1:N
+        if paretoSide == "pri"
+            devNames(k) = string(pts(k).pri.device_name);
+        else
+            devNames(k) = string(pts(k).sec.device_name);
+        end
+    end
+    
+    [uniqueDevs, ~, devIdx] = unique(devNames, 'stable');
+
+    colors = lines(numel(uniqueDevs));
+
+    % Plot
+    for k = 1:N
+        jj = pts(k).jj;
+
+        mk = 'o';
+        if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+            mk = marker_by_jj{jj};
+        end
+
+        Color = colors(devIdx(k),:);
+
+        scatter(pts(k).area_mm2*0.00155, pts(k).loss_W, msize, ...
+            'Marker', mk, 'MarkerFaceColor', Color, ...
+            'MarkerEdgeColor', Color, 'LineWidth', 1.2);
+
+        text(pts(k).area_mm2*0.00155, pts(k).loss_W, ...
+            sprintf('  %.2f%%', 100*pts(k).eta), ...
+            'FontSize', 10, 'VerticalAlignment', 'middle');
+    end
+
+    xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
     ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
     % title(sprintf('Area vs Loss (P=%.2f kW)', Power/1e3), ...
     %     'Interpreter','none');
