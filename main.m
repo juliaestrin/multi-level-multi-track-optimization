@@ -101,7 +101,7 @@ w_height_list = linspace(5e-3, w_h_max, 50);    % [m]
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
 % Visualize result
-core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt);
+core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name);
 
 % Optional: Check parasitic resonance
 % Cps   = calculate_Cps_3Layer(opt.opt_design.l_winding, ...

@@ -47,7 +47,7 @@ function params = get_core_material(material_name)
             params.beta = 2.549625682;
             params.alpha = 2.15651264669503;
             params.uc   = 600;
-            params.name = 'Ferrite 80';
+            params.name = 'Fairite 80';
         
               
         % case {'3F46', 'FERROXCUBE_3F46', 'FERROXCUBE 3F46'}
