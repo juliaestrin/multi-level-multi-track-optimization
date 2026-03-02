@@ -162,7 +162,7 @@ marker_by_jj{10} = 'x';
 %% ============================================================
 % FIGURE 1: All devices
 %% ============================================================
-figure(); clf;
+figure(4); clf;
 tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
 
 nexttile; hold on; grid on;
@@ -205,7 +205,7 @@ rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
 C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
 
 plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
-    sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 4);
+    sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 5);
 
 %% ============================================================
 % Best Devices (min loss, min area, min loss*area, and Pareto)

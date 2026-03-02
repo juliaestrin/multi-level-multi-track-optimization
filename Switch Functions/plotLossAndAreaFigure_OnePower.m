@@ -1,5 +1,5 @@
 function plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, figTitle, figNum)
-    figure(); clf;
+    figure(figNum); clf;
     tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
 
     jj_set = C.jj_set;
