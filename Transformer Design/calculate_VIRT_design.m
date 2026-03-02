@@ -94,7 +94,18 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     %% Core Geometry
     % Square wave voltage with amplitude Vso generated across sum of
     % primaries for nt tracks
+    Vso = params.Np * params.nt * params.Vo;
+
+    % For a peak triangular flux density, the minimum core area required is:
     Ac = Vso / (4 * params.f * params.Np * Bmax);  % [m^2] required center leg area
+
+    % Air gap on center leg
+    % For nt tracks in series, total inductance is nt*Lu
+    lg = params.u0 * params.Np^2 * Ac / (params.nt * params.Lu);  % [m]
+
+    % Center post geometry
+    r_centerpost  = sqrt(Ac / pi);                 % [m]   center post radius (cylindrical)
+    w_core        = 2 * r_centerpost;              % [m]   core width = center post diameter
 
     % Outer legs: area = 1/2 center post area => uniform B in all sections
     l_leg         = 0.5 * Ac / w_core;             % [m]   outer leg length
