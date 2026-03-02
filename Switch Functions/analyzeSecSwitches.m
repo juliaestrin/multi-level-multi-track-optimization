@@ -196,7 +196,7 @@ sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1
 % ---- Top-N selection ----
 rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
 rank.N_keep  = 20;        % number of devices to keep
-rank.jj_list = [4 6];   % markers used on RIGHT tile only
+rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
 
 % Apply mode rule to jj_list (overlap behavior)
 rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);

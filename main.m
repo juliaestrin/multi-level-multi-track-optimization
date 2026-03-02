@@ -111,7 +111,7 @@ out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 2, 10, ...
     'GaN Data.xlsx', 'SiC Data.xlsx');
 
 %% SECONDARY SIDE SWITCH ANALYSIS
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6]);
+out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
 
 %% SYSTEM EFFICIENCY CALCULATION
 % eff = calcEfficiency(out1, out2, "pareto", "minLoss", ...
