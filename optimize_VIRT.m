@@ -66,7 +66,9 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     %% Parameter Sweep
     for i = 1:n_Pv
         for j = 1:n_wh
-            des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+           % des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+           des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+
 
             P_core_array(i,j)  = des.P_core;
             P_pri_array(i,j)   = des.P_pri;

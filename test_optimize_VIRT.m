@@ -17,7 +17,7 @@ f   = 2 * fsw;                 % [Hz] Transformer core frequency (2x switching d
 Np  = 4;                       % [-]  Number of primary turns (4 : 1/2 VIRT)
 w_h_max = 100e-3;               % [m] max window height (width) 
 
-%% Ferrite Material Parameters (Proterials ML91S)
+%% Ferrite Material Selection
 k    = 1606769230.46174;        % Steinmetz coefficient k   (P = k * B^beta)
 beta = 3.19564613808786;        % Steinmetz exponent beta
 uc   = 900;                     % [-]  Relative permeability of core material
