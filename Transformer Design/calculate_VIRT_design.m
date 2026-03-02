@@ -89,7 +89,7 @@
 function result = calculate_VIRT_design(Pv_max, w_height, params)
 
     %% Flux Density
-    Bmax = (Pv_max / params.k)^(1 / params.beta);
+    Bmax = (Pv_max / (params.k * params.f ^ params.alpha))^(1 / params.beta);
 
     %% Core Geometry
     % Square wave voltage with amplitude Vso generated across sum of
@@ -136,7 +136,7 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
 
     %% Core Loss
     % B field is uniform across all sections (leg/yoke area = 1/2 center post area)
-    P_core        = V_total * params.k * Bmax^params.beta;          % [W]
+    P_core        = V_total * params.k * params.f^params.alpha * Bmax^params.beta;          % [W]
 
     %% DC Winding Resistance
     % calculate_Rdc_summation(n, a_0, a_n, b_0, b_n, sigma_cu, t_cu)
