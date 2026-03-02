@@ -189,11 +189,11 @@ for ii_global = 1:n_sw
         Area(ii_global,k) = pri_sw_count * jj * L_min * W_min;
         I_d = I_rating / jj;
 
-        P_off(ii_global,k)  = (jj)*((I_d^2)*((t_f*(1e-9))^2)/(24*2*Coss*(1e-12)))/(1/(f_sw_max/2));
+        P_off(ii_global,k)  = (jj)*((I_d^2)*((t_f*(1e-9))^2)/(24*2*Coss*(1e-12)))/(1/f_sw_max);
 
         duty_cond = 0.25;
         P_cond(ii_global,k) = duty_cond * jj * (I_d^2) * R_ds_max;
-        P_gate(ii_global,k) = jj * V_g * Q_g * 1e-9 * (f_sw_max/2);
+        P_gate(ii_global,k) = jj * V_g * Q_g * 1e-9 * f_sw_max;
 
         P_total(ii_global,k) = P_off(ii_global,k) + P_cond(ii_global,k) + P_gate(ii_global,k);
 
