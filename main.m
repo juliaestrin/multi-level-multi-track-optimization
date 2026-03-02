@@ -61,6 +61,7 @@ Ir_pk  = Ir_rms * sqrt(2);      % [A]  Primary peak current
 N      = LLC_design.N;          % [-]  Turns Ratio 
 Np     = N / nt;                % [-]  Total primary turns
 
+
 %% VIRT TRANSFORMER OPTIMIZATION
 
 % Load core material properties

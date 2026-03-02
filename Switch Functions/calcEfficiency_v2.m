@@ -138,8 +138,8 @@ function effOut = calcEfficiency_v2(PriOut, SecOut, modePri, modeSec, Power, oth
     if showTable
         disp(T);
         % Also pop a UI table (comment out if you don't want a window)
-        fTbl = figure(figNum + 2); clf(fTbl);
-        fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
+        fTbl = figure(); clf(fTbl);
+        fTbl.Name = sprintf('Pareto Results Table');
         uitable(fTbl, 'Data', T, 'Units','normalized', 'Position',[0 0 1 1]);
     end
 
@@ -150,7 +150,7 @@ end
 
 
 function plotAreaLoss(pts, paretoSide, marker_by_jj, figNum, useIn2)
-    figure(figNum); clf;
+    figure(); clf;
     hold on; grid on;
 
     N = numel(pts);
