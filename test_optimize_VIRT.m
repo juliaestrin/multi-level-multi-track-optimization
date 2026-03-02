@@ -116,11 +116,8 @@ fprintf('  w_height range: %.1f - %.1f mm (%d points)\n', ...
     min(w_height_list)*1e3, max(w_height_list)*1e3, length(w_height_list));
 fprintf('  Total designs:  %d\n', length(Pv_max_list) * length(w_height_list));
 
-tic;
-opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
-elapsed = toc;
 
-fprintf('  Optimization completed in %.2f seconds.\n', elapsed);
+opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
 %% Parasitic Capacitance and Resonant Frequency
 % Cps   = calculate_Cps_3Layer(opt.opt_design.l_winding, opt.opt_design.w_winding, opt.opt_design.w_core);
