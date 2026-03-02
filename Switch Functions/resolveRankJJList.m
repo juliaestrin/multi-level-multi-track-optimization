@@ -1,4 +1,4 @@
-function jj_list_out = resolveRankJjList(mode, jj_list_in, max_para, selected_para)
+function jj_list_out = resolveRankJJList(mode, jj_list_in, max_para, selected_para)
     jj_list_in = unique(jj_list_in(:).','stable');
 
     if mode == 1

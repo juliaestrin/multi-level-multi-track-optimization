@@ -322,7 +322,7 @@ sgtitle(sprintf('Primary Devices (%s) ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', .
 rank.jj_rank = 6;
 rank.N_keep  = 20;
 rank.jj_list = [1 2 3 4 5 6 7 8];
-rank.jj_list = resolveRankJjList(mode, rank.jj_list, max_para, selected_para);
+rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
 
 C = buildSelectedTopN(Area, P_total_plot, jj_set, Meta, colors, rank);
 
@@ -333,7 +333,7 @@ if isempty(compare_list)
     compare_list = jj_set; 
 end
 
-compare_list = resolveRankJjList(mode, compare_list, max_para, selected_para);
+compare_list = resolveRankJJList(mode, compare_list, max_para, selected_para);
 
 compare_list = compare_list(ismember(compare_list, jj_set));
 

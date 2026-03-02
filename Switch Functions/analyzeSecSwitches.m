@@ -199,7 +199,7 @@ rank.N_keep  = 20;        % number of devices to keep
 rank.jj_list = [4 6];   % markers used on RIGHT tile only
 
 % Apply mode rule to jj_list (overlap behavior)
-rank.jj_list = resolveRankJjList(mode, rank.jj_list, max_para, selected_para);
+rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
 
 % Build selection (top-N by loss at jj_rank)
 C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
@@ -216,7 +216,7 @@ if isempty(compare_list)
 end
 
 % Make compare_list compatible with mode
-compare_list = resolveRankJjList(mode, compare_list, max_para, selected_para);
+compare_list = resolveRankJJList(mode, compare_list, max_para, selected_para);
 
 % Ensure compare_list values exist in jj_set
 compare_list = compare_list(ismember(compare_list, jj_set));
