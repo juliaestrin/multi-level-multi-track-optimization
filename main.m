@@ -36,7 +36,7 @@ Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 % --- Transformer Design Specs ---
 material_name = 'F80';      % Core: 'ML91S', 'F80', '3F46'
 w_h_max       = 20e-3;     % [m]    Max window height
-w_scale       = 1/2;        % [-]    Winding width scale (0.5 = half-width)
+w_scale       = 1/2;        % [-]    Winding width scale 
 stackup       = '5layer';   % '3layer','5layer','6layer_interleaved', etc.
 
 w_b         = 4e-3;         % [m]    Window breadth

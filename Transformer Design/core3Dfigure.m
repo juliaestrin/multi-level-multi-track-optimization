@@ -39,10 +39,11 @@ function core3Dfigure(result, Pv_max, w_height)
     h_yoke        = result.h_yoke        * 1e3;
     w_b           = result.w_b           * 1e3;
     h_core        = result.h_core        * 1e3;
-    r_centerpost  = result.r_centerpost  * 1e3;
+    %r_centerpost  = result.r_centerpost  * 1e3;
     l_winding     = result.l_winding     * 1e3;
     w_winding     = result.w_winding     * 1e3;
     t_pcb         = 1.6;                            % [mm] PCB thickness (fixed)
+    r_centerpost = w_core/2;
 
     % --- Bottom Yoke ---
     drawBox([-l_core/2, 0, 0], [l_core, w_core, h_yoke], core_color);
@@ -60,12 +61,15 @@ function core3Dfigure(result, Pv_max, w_height)
 
     % --- Center Post (cylinder along z) ---
     % Spans from bottom yoke top to top yoke bottom (height = w_b)
-    x_center = l_core / 2;
-    [X, Y, Z] = cylinder(r_centerpost);
-    Z = Z * w_b;
-    X = X + x_center - l_core/2;
-    Y = Y + w_core / 2;
-    surf(X, Y, Z + h_yoke, 'FaceColor', core_color, 'EdgeColor', 'k', 'LineWidth', 0.5);
+    % x_center = l_core / 2;
+    % [X, Y, Z] = cylinder(r_centerpost);
+    % Z = Z * w_b;
+    % X = X + x_center - l_core/2;
+    % Y = Y + w_core / 2;
+    % surf(X, Y, Z + h_yoke, 'FaceColor', core_color, 'EdgeColor', 'k', 'LineWidth', 0.5);
+
+    % Center Leg 
+    drawBox([-w_core/2, 0, h_yoke], [w_core, w_core, w_b], core_color);
 
     % --- Primary Winding (4 PCB strips forming a rectangular frame) ---
     % Winding sits at mid-height of the window, centered at z = h_yoke + w_b/2
@@ -91,7 +95,7 @@ function core3Dfigure(result, Pv_max, w_height)
     xlabel('X [mm]', 'FontSize', 12, 'FontWeight', 'bold');
     ylabel('Y [mm]', 'FontSize', 12, 'FontWeight', 'bold');
     zlabel('Z [mm]', 'FontSize', 12, 'FontWeight', 'bold');
-    title(sprintf(['3D EQ-Core Transformer\n' ...
+    title(sprintf(['3D EE-Core Transformer\n' ...
                    'P_v = %.0f kW/m³,  Window Height = %.1f mm,  Total Loss = %.2f W\n' ...
                    'Copper Loss = %.2f W,  Core Loss = %.2f W'], ...
            Pv_max / 1e3, w_height * 1e3, ...

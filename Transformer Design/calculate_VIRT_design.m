@@ -103,9 +103,12 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     % For nt tracks in series, total inductance is nt*Lu
     lg = params.u0 * params.Np^2 * Ac / (params.nt * params.Lu);  % [m]
 
-    % Center post geometry
-    r_centerpost  = sqrt(Ac / pi);                 % [m]   center post radius (cylindrical)
-    w_core        = 2 * r_centerpost;              % [m]   core width = center post diameter
+    % % Center post geometry
+    % r_centerpost  = sqrt(Ac / pi);                 % [m]   center post radius (cylindrical)
+    % w_core        = 2 * r_centerpost;              % [m]   core width = center post diameter
+
+    % Square centerpost 
+    w_core = sqrt(Ac); 
 
     % Outer legs: area = 1/2 center post area => uniform B in all sections
     l_leg         = 0.5 * Ac / w_core;             % [m]   outer leg length
@@ -114,16 +117,24 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     h_yoke        = l_leg;                          % [m]   yoke height
 
     % Overall core envelope
-    l_core        = 2 * w_height + 2 * l_leg + 2 * r_centerpost;  % [m]   total core length
+    % l_core        = 2 * w_height + 2 * l_leg + 2 * r_centerpost;  % [m]   total core length
+
+    % Square centerpost 
+    l_core        = 2 * w_height + 2 * l_leg + w_core;  % [m]   total core length
     h_core        = 2 * h_yoke + params.w_b;                       % [m]   total core height
 
     %% Winding Geometry
-    % Winding outer dimensions
-    l_winding     = 2 * r_centerpost + 2 * w_height;               % [m]   winding outer length
-    w_winding     = 2 * r_centerpost + params.w_scale * 2 * w_height;               % [m]   winding outer width
+    % Winding outer dimensions - round centerpost
+    % l_winding     = 2 * r_centerpost + 2 * w_height;               % [m]   winding outer length
+    % w_winding     = 2 * r_centerpost + params.w_scale * 2 * w_height; % [m]   winding outer width
+    
+    % Square centerpost 
+    l_winding     = w_core + 2 * w_height;               % [m]   winding outer length
+    w_winding     = w_core + params.w_scale * 2 * w_height; % [m]   winding outer width
 
     %% Core Cross-Section Areas
-    A_centerpost  = pi * r_centerpost^2;                            % [m^2]
+  %  A_centerpost  = pi * r_centerpost^2;                            % [m^2]
+     A_centerpost  = w_core^2;                            % [m^2]
     A_leg         = l_leg  * w_core;                                % [m^2]
     A_yoke        = h_yoke * w_core;                                % [m^2]
     A_footprint   = w_winding * l_core;                             % [m^2] PCB footprint
@@ -166,7 +177,6 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
     result = struct( ...
         'Bmax',         Bmax,           ...
         'Ac',           Ac,             ...
-        'r_centerpost', r_centerpost,   ...
         'w_core',       w_core,         ...
         'l_leg',        l_leg,          ...
         'h_yoke',       h_yoke,         ...
@@ -186,4 +196,5 @@ function result = calculate_VIRT_design(Pv_max, w_height, params)
         'P_total',      P_total        ...
          );
 
+    %'r_centerpost', r_centerpost,   ...
 end
