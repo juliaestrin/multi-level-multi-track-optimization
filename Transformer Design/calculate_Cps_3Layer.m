@@ -1,4 +1,4 @@
-function Cps = calculcate_Cps_3Layer(l_winding, w_winding, w_core)
+function Cps = calculate_Cps_3Layer(l_winding, w_winding, w_core)
     e0 = 8.854e-12; % peritivity of free space
     er = 4.2; % permitivity of FR4
     d_ij = 0.11e-3; % [m] distance between pcb layers 

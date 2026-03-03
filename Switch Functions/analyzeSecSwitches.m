@@ -42,7 +42,7 @@ spacing = 4*(0.00254);
 D_via = 6*(0.00254);
 T_water = 45;
 
-R_plate = 0.08;
+R_plate = 0.08; %
 Area_plate = 152.4*76.2; % [mm2]
 
 f_sw_max = f_sw_typ*(1.25);

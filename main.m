@@ -46,11 +46,6 @@ nt          = 2;            % [-]    Number of secondary tracks (series connecti
 Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
-fprintf('  Input voltage:    %.0f V\n', Vin_nom);
-fprintf('  Output voltage:   %.0f V (per track)\n', Vo_nom);
-fprintf('  Tracks (series):  %d\n', nt);
-fprintf('  Power (max):      %.2f kW\n', Pmax / 1e3);
-fprintf('  Power (min):      %.2f kW\n', Pmin / 1e3);
 
 % --- Frequency Selection ---
 fsw         = 400e3;        % [Hz]   FCML switching frequency
@@ -58,19 +53,12 @@ f0          = 2 * fsw;      % [Hz]   Transformer frequency
                             %        FCML topology doubles switching frequency
                             %        at the transformer
 
-fprintf('  fsw (FCML):       %.0f kHz\n', fsw / 1e3);
-fprintf('  f0 (transformer): %.1f MHz\n', f0 / 1e6);
-
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
 percentReg  = 0.1;          % [-]    Line regulation tolerance (±10%)
 f_per       = 0.25;         % [-]    Frequency range (±25%)
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
-fprintf('  LLC Mg_nom:       %.1f\n', Mg_nom);
-fprintf('  Line reg:         ±%.0f%%\n', percentReg * 100);
-fprintf('  Freq range:       ±%.0f%%\n', f_per * 100);
-fprintf('  Ln (Lm/Lr):       %.1f\n', Ln);
 
 % --- Transformer Design Specifications ---
 material_name = 'F80';      % Core material selection
@@ -91,19 +79,12 @@ stackup       = '5layer';   % Winding layer configuration
 %   '7layer_interleaved' - P-S-P-S-P-S-P
 %   '8layer_interleaved' - P-S-P-S-P-S-P-S
 
-fprintf('  Core material:    %s\n', material_name);
-fprintf('  Max window height:%.1f mm\n', w_h_max * 1e3);
-fprintf('  Winding scale:    %.2f\n', w_scale);
-fprintf('  Stackup:          %s\n', stackup);
 
 % --- Transformer Fixed Parameters ---
 w_b         = 4e-3;         % [m]    Winding window breadth (depth into page)
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
 
-fprintf('  Window breadth:   %.1f mm\n', w_b * 1e3);
-fprintf('  Copper (pri):     %.0f µm (%.1f oz)\n', t_cu_pri * 1e6, t_cu_pri / 35e-6);
-fprintf('  Copper (sec):     %.0f µm (%.1f oz)\n', t_cu_sec * 1e6, t_cu_sec / 35e-6);
 
 % --- Material Constants ---
 rho_cu      = 2.2e-8;       % [Ohm·m] Copper resistivity at 100°C
@@ -111,9 +92,26 @@ sigma_cu    = 1 / rho_cu;   % [S/m]   Copper conductivity
 u0          = 4 * pi * 1e-7;% [H/m]   Permeability of free space
 
 
-%  LLC RESONANT TANK DESIGN
+fprintf('  Input voltage:    %.0f V\n', Vin_nom);
+fprintf('  Output voltage:   %.0f V (per track)\n', Vo_nom);
+fprintf('  Tracks (series):  %d\n', nt);
+fprintf('  Power (max):      %.2f kW\n', Pmax / 1e3);
+fprintf('  Power (min):      %.2f kW\n', Pmin / 1e3);
+fprintf('  fsw (FCML):       %.0f kHz\n', fsw / 1e3);
+fprintf('  f0 (transformer): %.1f MHz\n', f0 / 1e6);
+fprintf('  LLC Mg_nom:       %.1f\n', Mg_nom);
+fprintf('  Line reg:         ±%.0f%%\n', percentReg * 100);
+fprintf('  Freq range:       ±%.0f%%\n', f_per * 100);
+fprintf('  Ln (Lm/Lr):       %.1f\n', Ln);
+fprintf('  Core material:    %s\n', material_name);
+fprintf('  Max window height:%.1f mm\n', w_h_max * 1e3);
+fprintf('  Winding scale:    %.2f\n', w_scale);
+fprintf('  Stackup:          %s\n', stackup);
+fprintf('  Window breadth:   %.1f mm\n', w_b * 1e3);
+fprintf('  Copper (pri):     %.0f µm (%.1f oz)\n', t_cu_pri * 1e6, t_cu_pri / 35e-6);
+fprintf('  Copper (sec):     %.0f µm (%.1f oz)\n', t_cu_sec * 1e6, t_cu_sec / 35e-6);
 
-
+%%  LLC RESONANT TANK DESIGN
 
 fprintf('\n --- LLC RESONANT TANK DESIGN ---\n ');
 
@@ -145,7 +143,7 @@ fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 
 
-fprintf('--- VIRT TRANSFORMER OPTIMIZATION ---\n');
+fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
 
 % --- Load Core Material Properties ---
@@ -229,10 +227,10 @@ core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name);
 %                               opt.opt_design.w_winding, ...
 %                               opt.opt_design.w_core);
 % f_res = 1 / (2 * pi * sqrt(Cps * Llk));
-%
+% %
 % fprintf('  Cps:              %.4f nF\n', Cps * 1e9);
 % fprintf('  f_res (Llk-Cps):  %.4f MHz\n', f_res * 1e-6);
-%
+% %
 % if f_res < 1.5 * f0
 %     warning('Resonance (%.2f MHz) too close to operating frequency (%.2f MHz)', ...
 %         f_res / 1e6, f0 / 1e6);
