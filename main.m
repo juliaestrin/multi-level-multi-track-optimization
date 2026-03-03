@@ -85,6 +85,10 @@ w_b         = 4e-3;         % [m]    Winding window breadth (depth into page)
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
 
+% --- Heat Sink Parameters ---
+R_plate = 0.08; 
+Area_plate = 152.4*76.2; % [mm2]
+T_water = 45; 
 
 % --- Material Constants ---
 rho_cu      = 2.2e-8;       % [Ohm·m] Copper resistivity at 100°C
@@ -139,7 +143,7 @@ fprintf('  Ir_pk:            %.2f A\n', Ir_pk);
 fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 
-%  VIRT TRANSFORMER OPTIMIZATION
+%%  VIRT TRANSFORMER OPTIMIZATION
 
 
 
