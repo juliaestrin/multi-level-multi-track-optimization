@@ -37,13 +37,13 @@ tbls = {};
 techs = string.empty(1,0);
 
 if ~isempty(ganFile)
-    GaNData = readtable(ganFile);
+    GaNData = readtable(ganFile,'VariableNamingRule','preserve');
     tbls{end+1} = GaNData;
     techs(end+1) = "GaN";
 end
 
 if ~isempty(sicFile)
-    SiCData = readtable(sicFile);
+    SiCData = readtable(sicFile,'VariableNamingRule','preserve');
     tbls{end+1} = SiCData;
     techs(end+1) = "SiC";
 end

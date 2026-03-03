@@ -29,7 +29,7 @@ else
     error('mode must be 1 or 2');
 end
 
-SecData = readtable(dataFile);
+SecData = readtable(dataFile,'VariableNamingRule','preserve');
 
 %% ===================== Known Parameters =====================
 Vin = 1500;
@@ -54,8 +54,8 @@ sec_sw_count = 4;
 %% ===================== Current rating =====================
 I_sec_pk = (pi/2)*(Vout/R_load);
 I_rating = ceil(I_sec_pk/5)*5;
-fprintf("the I_sec_pk is %d\n",I_sec_pk);
-fprintf("the I_rating is %d\n",I_rating);
+% fprintf("the I_sec_pk is %d\n",I_sec_pk);
+% fprintf("the I_rating is %d\n",I_rating);
 
 %% ===================== Pre-allocate =====================
 n_sw = height(SecData);
