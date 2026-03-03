@@ -86,9 +86,16 @@ t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
 
 % --- Heat Sink Parameters ---
-R_plate = 0.08; 
-Area_plate = 152.4*76.2; % [mm2]
+% PN: 180-10-6C
+% https://wakefieldthermal.com/content/data_sheets/Standard%20Liquid%20Cold%20Plates.pdf
+R_plate = 0.08; % [C/W] thermal resistance plate to inlet water
+Area_plate = 152.4e-3*76.2e-3; % [m^2] area of cold plate 
 T_water = 45; 
+
+% Thermal Grease 
+% BERGQUIST TGR 4000 (arbitrarily selected) 
+sig_grease = 4;  % [W/(mK)] thermal conductivity of grease 
+d_grease = 0.127e-3; % [m] reccomended thermal grease thickness 
 
 % --- Material Constants ---
 rho_cu      = 2.2e-8;       % [Ohm·m] Copper resistivity at 100°C
@@ -208,6 +215,9 @@ fprintf('  Total designs:    %d\n', length(Pv_max_list) * length(w_height_list))
 % --- Run Optimization ---
 opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
+% --- Approximate Transformer Temp Rise ---
+T_tx = calculate_transformer_temp(opt.opt_design.P_total, opt.opt_design.Ac, opt.opt_design.h_core/2, R_plate, Area_plate, T_water, sig_grease, d_grease);
+
 % --- Display Optimal Design Results ---
 fprintf('\nOptimal Transformer Design:\n');
 fprintf('  Pv_max_opt:       %.2f kW/m³\n', opt.Pv_max_opt / 1e3);
@@ -219,9 +229,10 @@ fprintf('  Air gap:          %.4f mm\n', opt.opt_design.lg * 1e3);
 fprintf('  P_core:           %.2f W\n', opt.P_core_min);
 fprintf('  P_copper:         %.2f W\n', opt.P_copper_min);
 fprintf('  P_total:          %.2f W\n', opt.P_total_min);
+fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
 % --- Generate 3D Visualization ---
-core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name);
+core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_tx);
 
 % --- Parasitic Capacitance and Resonance Check (Optional) ---
 % Uncomment to calculate primary-to-secondary capacitance and verify
