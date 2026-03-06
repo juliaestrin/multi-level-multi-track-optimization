@@ -14,7 +14,7 @@ function out = analyzeSecSwitches(Power, f_sw_typ, mode, max_para, selected_para
 
 %% ===================== Defaults =====================
 if nargin < 7 || isempty(dataFile)
-    dataFile = 'Sec Data.xlsx';
+    dataFile = 'Switch Functions\Sec Data.xlsx';
 end
 if nargin < 6 || isempty(compare_list)
     compare_list = [];

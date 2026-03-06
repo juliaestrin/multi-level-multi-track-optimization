@@ -3,6 +3,6 @@ out1 = analyzePriSwitches(6.25e3, 500e3, 21.4142, 2, 10, ...
     'GaN Data.xlsx', 'SiC Data.xlsx');
 %
 % Secondary Side
-out2 = analyzeSecSwitches(6.25e3, 1000e3, 1, 10, [4 6 8], [4 6]);
+out2 = analyzeSecSwitches(6.25e3, 1000e3, 1, 10, [4 6 8], [4 6], 'Sec Data.xlsx');
 
 eff = calcEfficiency(out1, out2, "pareto", "minLoss", 6.25e3, 20, 0);
