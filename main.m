@@ -1,6 +1,6 @@
 % Multilevel Multitrack Converter Design, Optimization, and Pareto Front
 % Generation 
-% Authors: Julia Estrin, Qi Li
+% Authors: Julia Estrin, Qijia Li
 % Date:    03-02-2026
 %
 % Description:
