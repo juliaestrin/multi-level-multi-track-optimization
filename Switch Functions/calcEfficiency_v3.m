@@ -196,100 +196,115 @@ end
 
 function plotAreaLoss_v3(pts, marker_by_jj, figNum, useIn2)
 
-    figure(figNum); clf;
-    hold on; grid on;
+figure(figNum); clf;
+hold on; grid on;
 
-    N = numel(pts);
-    msize = 90;
+N = numel(pts);
+msize = 90;
 
-    % --------------------------------------------------
-    % Extract jj values
-    % --------------------------------------------------
-    jj_pri = reshape([pts.jj_pri], [], 1);
-    jj_sec = reshape([pts.jj_sec], [], 1);
+% --------------------------------------------------
+% Extract primary/secondary info
+% --------------------------------------------------
+jj_pri = reshape([pts.jj_pri], [], 1);
 
-    jjPriVals = unique(jj_pri, 'stable');
-    jjSecVals = unique(jj_sec, 'stable');
+sec_names = strings(N,1);
+for k = 1:N
+    sec_names(k) = string(pts(k).sec.device_name);
+end
 
-    % Colors for secondary parallel counts
-    colors = lines(numel(jjSecVals));
+% Unique sets
+jjPriVals = unique(jj_pri,'stable');
+secNameVals = unique(sec_names,'stable');
 
-    % --------------------------------------------------
-    % Plot points
-    % --------------------------------------------------
-    for k = 1:N
+% Colors for secondary points
+colors = lines(numel(secNameVals));
 
-        % ----- marker = primary parallel -----
-        jj_p = pts(k).jj_pri;
-        mk = 'o';
-        if jj_p <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj_p})
-            mk = marker_by_jj{jj_p};
-        end
+% --------------------------------------------------
+% Plot points
+% --------------------------------------------------
+for k = 1:N
 
-        % ----- color = secondary parallel -----
-        jj_s = pts(k).jj_sec;
-        colorIdx = find(jjSecVals == jj_s, 1, 'first');
-        Color = colors(colorIdx,:);
+    % ----- marker = primary parallel -----
+    jj_p = pts(k).jj_pri;
 
-        x = pts(k).area_mm2;
-        if useIn2
-            x = x * 0.00155;
-        end
-        y = pts(k).loss_W;
-
-        scatter(x, y, msize, ...
-            'Marker', mk, ...
-            'MarkerFaceColor', Color, ...
-            'MarkerEdgeColor', Color, ...
-            'LineWidth', 1.2);
-
-        text(x, y, sprintf('  %.2f%%', 100*pts(k).eta), ...
-            'FontSize', 10, ...
-            'VerticalAlignment', 'middle');
+    mk = 'o';
+    if jj_p <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj_p})
+        mk = marker_by_jj{jj_p};
     end
 
-    % --------------------------------------------------
-    % Axis labels
-    % --------------------------------------------------
+    % ----- color = secondary candidate -----
+    secName = string(pts(k).sec.device_name);
+    colorIdx = find(secNameVals == secName,1);
+    Color = colors(colorIdx,:);
+
+    x = pts(k).area_mm2;
     if useIn2
-        xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
-    else
-        xlabel('Total Area [mm$^2$]','Interpreter','latex','FontSize',15);
-    end
-    ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
-
-    % --------------------------------------------------
-    % Combined legend:
-    %   marker entries = primary parallel count
-    %   color entries  = secondary parallel count
-    % --------------------------------------------------
-    h1 = gobjects(numel(jjPriVals),1);
-    for i = 1:numel(jjPriVals)
-        jj = jjPriVals(i);
-        mk = 'o';
-        if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
-            mk = marker_by_jj{jj};
-        end
-
-        h1(i) = scatter(nan, nan, msize, ...
-            'Marker', mk, ...
-            'MarkerFaceColor', 'k', ...
-            'MarkerEdgeColor', 'k', ...
-            'LineWidth', 1.2);
+        x = x * 0.00155;
     end
 
-    h2 = gobjects(numel(jjSecVals),1);
-    for i = 1:numel(jjSecVals)
-        h2(i) = scatter(nan, nan, msize, ...
-            'Marker', 'o', ...
-            'MarkerFaceColor', colors(i,:), ...
-            'MarkerEdgeColor', colors(i,:), ...
-            'LineWidth', 1.2);
+    y = pts(k).loss_W;
+
+    scatter(x, y, msize, ...
+        'Marker', mk, ...
+        'MarkerFaceColor', Color, ...
+        'MarkerEdgeColor', Color, ...
+        'LineWidth', 1.2);
+
+    text(x, y, sprintf('  %.2f%%',100*pts(k).eta), ...
+        'FontSize',10, ...
+        'VerticalAlignment','middle');
+
+end
+
+% --------------------------------------------------
+% Axis labels
+% --------------------------------------------------
+if useIn2
+    xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
+else
+    xlabel('Total Area [mm$^2$]','Interpreter','latex','FontSize',15);
+end
+
+ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+
+% --------------------------------------------------
+% Marker legend (primary parallel)
+% --------------------------------------------------
+h1 = gobjects(numel(jjPriVals),1);
+
+for i = 1:numel(jjPriVals)
+
+    jj = jjPriVals(i);
+
+    mk = 'o';
+    if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+        mk = marker_by_jj{jj};
     end
 
-    legend([h1; h2], ...
-           [compose('Pri %d', jjPriVals); compose('Sec %d', jjSecVals)], ...
-           'Location', 'bestoutside', ...
-           'FontSize', 10);
+    h1(i) = scatter(nan,nan,90, ...
+        'Marker',mk, ...
+        'MarkerFaceColor','k', ...
+        'MarkerEdgeColor','k', ...
+        'LineWidth',1.2);
+end
+
+% --------------------------------------------------
+% Color legend (secondary candidate)
+% --------------------------------------------------
+h2 = gobjects(numel(secNameVals),1);
+
+for i = 1:numel(secNameVals)
+
+    h2(i) = scatter(nan,nan,90, ...
+        'Marker','o', ...
+        'MarkerFaceColor',colors(i,:), ...
+        'MarkerEdgeColor',colors(i,:), ...
+        'LineWidth',1.2);
+end
+
+legend([h1;h2], ...
+       [compose('Pri %d',jjPriVals); secNameVals], ...
+       'Location','bestoutside', ...
+       'FontSize',10);
 
 end
