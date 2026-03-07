@@ -1,7 +1,7 @@
 function effOut = calcEfficiency_v2(PriOut, SecOut, modePri, modeSec, Power, other_loss, other_area, marker_by_jj, figNum, showTable)
 % calcEfficiency
 % - If neither side is "pareto": returns scalar results (eta, total loss, total area)
-% - If exactly one side is "pareto": builds list of poin ts, plots, and creates a results table
+% - If exactly one side is "pareto": builds list of points, plots, and creates a results table
 
     % ---------------- Defaults ----------------
     if nargin < 6 || isempty(other_loss), other_loss = 0; end
@@ -138,14 +138,14 @@ function effOut = calcEfficiency_v2(PriOut, SecOut, modePri, modeSec, Power, oth
     if showTable
         disp(T);
         % Also pop a UI table (comment out if you don't want a window)
-        fTbl = figure(figNum + 2); clf(fTbl);
-        fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
+        fTbl = figure(6); clf(fTbl);
+        fTbl.Name = sprintf('Pareto Results Table');
         uitable(fTbl, 'Data', T, 'Units','normalized', 'Position',[0 0 1 1]);
     end
 
     % ---------------- Plotting (mm^2 and in^2) ----------------
-    plotAreaLoss(pts, paretoSide, marker_by_jj, figNum,   false); % mm^2
-    plotAreaLoss(pts, paretoSide, marker_by_jj, figNum+1, true);  % in^2
+    plotAreaLoss(pts, paretoSide, marker_by_jj, 7,   false); % mm^2
+    plotAreaLoss(pts, paretoSide, marker_by_jj, 8, true);  % in^2
 end
 
 
