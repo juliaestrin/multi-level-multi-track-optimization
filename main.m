@@ -48,7 +48,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 
 % --- Frequency Selection ---
-fsw         = 400e3;        % [Hz]   FCML switching frequency
+fsw         = 500e3;        % [Hz]   FCML switching frequency
 f0          = 2 * fsw;      % [Hz]   Transformer frequency
                             %        FCML topology doubles switching frequency
                             %        at the transformer
@@ -257,8 +257,8 @@ core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
 out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 2, 10, ...
-    [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 500, ...
-    'GaN Data.xlsx', 'SiC Data.xlsx');
+    [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 10000, ...
+    'GaN Data tf.xlsx', 'SiC Data tf.xlsx');
 
 
 %%  SECONDARY SIDE SWITCH ANALYSIS
@@ -281,8 +281,8 @@ out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
 %     Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
 
 % Run enhanced efficiency calculation with table output and Pareto analysis:
-effOut = calcEfficiency_v2(out1, out2, "pareto", "minLoss", ...
-    Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6, [], [], 1);
+effOut = calcEfficiency_v3(out1, out2, "pareto", "pareto", ...
+    Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
 
 
 % Access results:
