@@ -48,7 +48,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 
 % --- Frequency Selection ---
-fsw         = 500e3;        % [Hz]   FCML switching frequency
+fsw         = 300e3;        % [Hz]   FCML switching frequency
 f0          = 2 * fsw;      % [Hz]   Transformer frequency
                             %        FCML topology doubles switching frequency
                             %        at the transformer
@@ -265,7 +265,7 @@ out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 2, 10, ...
 
 % Evaluate series-parallel combinations
 % Series: 4, 6, 8 devices    Parallel: 4, 6, 8 devices
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
+out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6]);
 
 % Calculate overall system efficiency and create pareto front including:
 %   - Transformer losses/area (core + copper)
@@ -284,6 +284,13 @@ out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
 effOut = calcEfficiency_v3(out1, out2, "pareto", "pareto", ...
     Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
 
+% Sweep with switching frequency
+f_sw_list = [300e3, 400e3, 500e3];
+freqSweepOut = compareParetoFreq( ...
+    f_sw_list, ...
+    Pmax, Ir_rms, ...
+    Pv_max_list, w_height_list, design_params, ...
+    makeMarkerMap(), 20, false);
 
 % Access results:
 %   effOut.table          - Pareto front results table

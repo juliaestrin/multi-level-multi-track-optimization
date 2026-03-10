@@ -1,4 +1,4 @@
-function effOut = calcEfficiency_v3(PriOut, SecOut, modePri, modeSec, Power, other_loss, other_area, marker_by_jj, figNum, showTable)
+function effOut = calcEfficiency_v3(PriOut, SecOut, modePri, modeSec, Power, other_loss, other_area, marker_by_jj, figNum, showTable, doPlot)
 % calcEfficiency_v3
 % Cases:
 %   1) neither side is "pareto" -> scalar result
@@ -15,6 +15,7 @@ function effOut = calcEfficiency_v3(PriOut, SecOut, modePri, modeSec, Power, oth
     if nargin < 8 || isempty(marker_by_jj), marker_by_jj = makeMarkerMap(); end
     if nargin < 9 || isempty(figNum), figNum = 10; end
     if nargin < 10 || isempty(showTable), showTable = true; end
+    if nargin < 11 || isempty(doPlot), doPlot = true; end
 
     if ~isstring(modePri) || ~isscalar(modePri) || ~isstring(modeSec) || ~isscalar(modeSec)
         error('modePri and modeSec must be string scalars (e.g., "minLoss", "pareto").');
@@ -182,14 +183,46 @@ function effOut = calcEfficiency_v3(PriOut, SecOut, modePri, modeSec, Power, oth
 
     if showTable
         disp(T);
-        fTbl = figure(figNum + 2); clf(fTbl);
-        fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
-        uitable(fTbl, 'Data', T, 'Units','normalized', 'Position',[0 0 1 1]);
+
+        if doPlot
+            fTbl = figure(figNum + 2); clf(fTbl);
+            fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
+            uitable(fTbl, 'Data', T, 'Units','normalized', 'Position',[0 0 1 1]);
+        end
     end
 
-    % ---------------- Plotting (mm^2 and in^2) ----------------
-    plotAreaLoss_v3(pts, marker_by_jj, figNum,   false);
-    plotAreaLoss_v3(pts, marker_by_jj, figNum+1, true);
+    % ---------------- Overall Pareto front data for pareto/pareto case ----------------
+    % Only generate/store this when the secondary Pareto set has > 1 points
+    if isParetoPri && isParetoSec && numel(SecOut.best.pareto) > 1
+
+        area_vec = reshape([pts.area_mm2], [], 1);
+        loss_vec = reshape([pts.loss_W],   [], 1);
+
+        isPareto = computeParetoFront(area_vec, loss_vec);
+        paretoIdx = find(isPareto);
+
+        % Sort by area for cleaner visual ordering
+        [~, order] = sort(area_vec(paretoIdx), 'ascend');
+        paretoIdx = paretoIdx(order);
+
+        effOut.overallParetoIdx = paretoIdx;
+        effOut.overallParetoPoints = pts(paretoIdx);
+
+    else
+        effOut.overallParetoIdx = [];
+        effOut.overallParetoPoints = struct([]);
+    end
+
+    % ---------------- Plotting ----------------
+    if doPlot
+        plotAreaLoss_v3(pts, marker_by_jj, figNum,   false);
+        plotAreaLoss_v3(pts, marker_by_jj, figNum+1, true);
+
+        if ~isempty(effOut.overallParetoPoints)
+            plotOverallParetoFront_v3(pts, effOut.overallParetoIdx, marker_by_jj, figNum+3, false);
+            plotOverallParetoFront_v3(pts, effOut.overallParetoIdx, marker_by_jj, figNum+4, true);
+        end
+    end
 
 end
 
@@ -306,5 +339,264 @@ legend([h1;h2], ...
        [compose('Pri %d',jjPriVals); secNameVals], ...
        'Location','bestoutside', ...
        'FontSize',10);
+
+end
+
+function plotOverallParetoFront_v3(pts, paretoIdx, marker_by_jj, figNum, useIn2)
+
+pfPts = pts(paretoIdx);
+
+figure(figNum); clf;
+hold on; grid on;
+
+N = numel(pfPts);
+msize = 90;
+
+% --------------------------------------------------
+% Extract primary/secondary parallel counts
+% --------------------------------------------------
+jj_pri = reshape([pfPts.jj_pri], [], 1);
+jj_sec = reshape([pfPts.jj_sec], [], 1);
+
+% Unique sets
+jjPriVals = unique(jj_pri,'stable');
+jjSecVals = unique(jj_sec,'stable');
+
+% Colors for secondary parallel counts
+colors = lines(numel(jjSecVals));
+
+% --------------------------------------------------
+% Plot Pareto-front points only
+% --------------------------------------------------
+for k = 1:N
+
+    % ----- marker = primary parallel count -----
+    jj_p = pfPts(k).jj_pri;
+
+    mk = 'o';
+    if jj_p <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj_p})
+        mk = marker_by_jj{jj_p};
+    end
+
+    % ----- color = secondary parallel count -----
+    jj_s = pfPts(k).jj_sec;
+    colorIdx = find(jjSecVals == jj_s, 1);
+    Color = colors(colorIdx,:);
+
+    x = pfPts(k).area_mm2;
+    if useIn2
+        x = x * 0.00155;
+    end
+
+    y = pfPts(k).loss_W;
+
+    scatter(x, y, msize, ...
+        'Marker', mk, ...
+        'MarkerFaceColor', Color, ...
+        'MarkerEdgeColor', Color, ...
+        'LineWidth', 1.2);
+
+    text(x, y, sprintf('  %.2f%%',100*pfPts(k).eta), ...
+        'FontSize',10, ...
+        'VerticalAlignment','middle');
+end
+
+% --------------------------------------------------
+% Axis labels
+% --------------------------------------------------
+if useIn2
+    xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
+else
+    xlabel('Total Area [mm$^2$]','Interpreter','latex','FontSize',15);
+end
+
+ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+title('Overall Pareto Front','FontSize',15);
+
+% --------------------------------------------------
+% Marker legend (primary parallel)
+% --------------------------------------------------
+h1 = gobjects(numel(jjPriVals),1);
+
+for i = 1:numel(jjPriVals)
+    jj = jjPriVals(i);
+
+    mk = 'o';
+    if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+        mk = marker_by_jj{jj};
+    end
+
+    h1(i) = scatter(nan,nan,90, ...
+        'Marker',mk, ...
+        'MarkerFaceColor','k', ...
+        'MarkerEdgeColor','k', ...
+        'LineWidth',1.2);
+end
+
+% --------------------------------------------------
+% Color legend (secondary parallel)
+% --------------------------------------------------
+h2 = gobjects(numel(jjSecVals),1);
+
+for i = 1:numel(jjSecVals)
+    h2(i) = scatter(nan,nan,90, ...
+        'Marker','o', ...
+        'MarkerFaceColor',colors(i,:), ...
+        'MarkerEdgeColor',colors(i,:), ...
+        'LineWidth',1.2);
+end
+
+legend([h1;h2], ...
+       [compose('Pri %d',jjPriVals); compose('Sec %d',jjSecVals)], ...
+       'Location','bestoutside', ...
+       'FontSize',10);
+
+end
+
+function plotOverallParetoFront_old(pts, paretoIdx, marker_by_jj, figNum, useIn2)
+
+figure(figNum); clf;
+hold on; grid on;
+
+N = numel(pts);
+msizeAll = 70;
+msizePf  = 120;
+
+% --------------------------------------------------
+% Extract primary / secondary parallel counts
+% --------------------------------------------------
+jj_pri = reshape([pts.jj_pri], [], 1);
+jj_sec = reshape([pts.jj_sec], [], 1);
+
+jjPriVals = unique(jj_pri, 'stable');
+jjSecVals = unique(jj_sec, 'stable');
+
+% Color map for secondary-side parallel count
+colors = lines(numel(jjSecVals));
+
+% --------------------------------------------------
+% Plot all points in background
+% --------------------------------------------------
+for k = 1:N
+
+    % marker = primary-side parallel count
+    jj_p = pts(k).jj_pri;
+    mk = 'o';
+    if jj_p <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj_p})
+        mk = marker_by_jj{jj_p};
+    end
+
+    % color = secondary-side parallel count
+    jj_s = pts(k).jj_sec;
+    colorIdx = find(jjSecVals == jj_s, 1);
+    Color = colors(colorIdx,:);
+
+    x = pts(k).area_mm2;
+    if useIn2
+        x = x * 0.00155;
+    end
+    y = pts(k).loss_W;
+
+    scatter(x, y, msizeAll, ...
+        'Marker', mk, ...
+        'MarkerFaceColor', 'none', ...
+        'MarkerEdgeColor', Color, ...
+        'LineWidth', 0.8);
+end
+
+% --------------------------------------------------
+% Pareto front coordinates
+% --------------------------------------------------
+pfPts = pts(paretoIdx);
+
+xpf = reshape([pfPts.area_mm2], [], 1);
+if useIn2
+    xpf = xpf * 0.00155;
+end
+ypf = reshape([pfPts.loss_W], [], 1);
+
+plot(xpf, ypf, '-', 'LineWidth', 1.8, 'Color', 'k');
+
+% --------------------------------------------------
+% Highlight Pareto-front points
+% --------------------------------------------------
+for ii = 1:numel(paretoIdx)
+
+    k = paretoIdx(ii);
+
+    % marker = primary-side parallel count
+    jj_p = pts(k).jj_pri;
+    mk = 'o';
+    if jj_p <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj_p})
+        mk = marker_by_jj{jj_p};
+    end
+
+    % color = secondary-side parallel count
+    jj_s = pts(k).jj_sec;
+    colorIdx = find(jjSecVals == jj_s, 1);
+    Color = colors(colorIdx,:);
+
+    x = pts(k).area_mm2;
+    if useIn2
+        x = x * 0.00155;
+    end
+    y = pts(k).loss_W;
+
+    scatter(x, y, msizePf, ...
+        'Marker', mk, ...
+        'MarkerFaceColor', Color, ...
+        'MarkerEdgeColor', 'k', ...
+        'LineWidth', 1.4);
+
+    text(x, y, sprintf('  %.2f%%', 100*pts(k).eta), ...
+        'FontSize', 10, ...
+        'VerticalAlignment', 'middle');
+end
+
+% --------------------------------------------------
+% Labels
+% --------------------------------------------------
+if useIn2
+    xlabel('Total Area [in$^2$]', 'Interpreter','latex', 'FontSize',15);
+else
+    xlabel('Total Area [mm$^2$]', 'Interpreter','latex', 'FontSize',15);
+end
+ylabel('Total Power Loss [W]', 'Interpreter','latex', 'FontSize',15);
+title('Overall Pareto Front', 'FontSize', 15);
+
+% --------------------------------------------------
+% Legend
+% --------------------------------------------------
+h1 = gobjects(numel(jjPriVals),1);
+for i = 1:numel(jjPriVals)
+    jj = jjPriVals(i);
+
+    mk = 'o';
+    if jj <= numel(marker_by_jj) && ~isempty(marker_by_jj{jj})
+        mk = marker_by_jj{jj};
+    end
+
+    h1(i) = scatter(nan, nan, 90, ...
+        'Marker', mk, ...
+        'MarkerFaceColor', 'k', ...
+        'MarkerEdgeColor', 'k', ...
+        'LineWidth', 1.2);
+end
+
+h2 = gobjects(numel(jjSecVals),1);
+for i = 1:numel(jjSecVals)
+    h2(i) = scatter(nan, nan, 90, ...
+        'Marker', 'o', ...
+        'MarkerFaceColor', colors(i,:), ...
+        'MarkerEdgeColor', colors(i,:), ...
+        'LineWidth', 1.2);
+end
+
+h3 = plot(nan, nan, '-', 'LineWidth', 1.8, 'Color', 'k');
+
+legend([h1; h2; h3], ...
+       [compose('Pri %d', jjPriVals); compose('Sec %d', jjSecVals); "Overall Pareto front"], ...
+       'Location', 'bestoutside', ...
+       'FontSize', 10);
 
 end
