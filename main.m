@@ -42,16 +42,20 @@ fprintf('\n--- Design Specifications ---\n');
 % --- Electrical Specifications ---
 Vin_nom     = 1500;         % [V]    Nominal input voltage
 Vo_nom      = 48;           % [V]    Nominal output voltage per track
-nt          = 2;            % [-]    Number of secondary tracks (series connection)
+nt          = 2;            % [-]    Number of primary tracks (series connection)
 Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 
 % --- Frequency Selection ---
-fsw         = 300e3;        % [Hz]   FCML switching frequency
-f0          = 2 * fsw;      % [Hz]   Transformer frequency
-                            %        FCML topology doubles switching frequency
-                            %        at the transformer
+topology    = "Multitrack";
+fsw         = 1000e3;        % [Hz]   FCML switching frequency
+f0          = fsw;           % [Hz]   Transformer frequency
+
+% topology    = "Multilevel Multitrack";
+% fsw         = 500e3;        % [Hz]   FCML switching frequency
+% f0          = 2*fsw;        % [Hz]   Transformer frequency
+                            
 
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
@@ -124,12 +128,14 @@ fprintf('  Copper (sec):     %.0f µm (%.1f oz)\n', t_cu_sec * 1e6, t_cu_sec / 3
 
 %%  LLC RESONANT TANK DESIGN
 
-fprintf('\n --- LLC RESONANT TANK DESIGN ---\n ');
+fprintf('\n --- LLC RESONANT TANK DESIGN ---\n');
 
 
 % Design LLC resonant tank based on gain requirements across
 % the full line and load regulation range
-LLC_design = designLLC(Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, ...
+% LLC_design = designLLC(Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, ...
+%                        f_per, Pmax, Pmin, Ln);
+LLC_design = designLLC_v2(topology, Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, ...
                        f_per, Pmax, Pmin, Ln);
 
 % --- Extract LLC Design Results ---
@@ -137,10 +143,10 @@ Lu     = LLC_design.Lm;         % [H]  Magnetizing inductance
 Llk    = LLC_design.Lr;         % [H]  Resonant (leakage) inductance
 Ir_rms = LLC_design.Ir_rms;     % [A]  Primary RMS current (worst case)
 Ir_pk  = Ir_rms * sqrt(2);      % [A]  Primary peak current
-N      = LLC_design.N;          % [-]  Turns ratio (primary:secondary per track)
+N      = LLC_design.N;          % [-]  Turns ratio (primary:secondary)
 Np     = N / nt;                % [-]  Primary turns per track
 
-fprintf('  Turns ratio:      %d:1 (per track)\n', N);
+fprintf('  Turns ratio:      %d:1\n', N);
 fprintf('  Np:1/2:           %d turns\n', Np);
 fprintf('  Lr (resonant):    %.4f µH\n', Llk * 1e6);
 fprintf('  Lm (magnetizing): %.4f µH\n', Lu * 1e6);
@@ -152,10 +158,7 @@ fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 %%  VIRT TRANSFORMER OPTIMIZATION
 
-
-
 fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
-
 
 % --- Load Core Material Properties ---
 % Retrieves Steinmetz parameters (k, beta, alpha) and permeability (uc)
@@ -256,16 +259,19 @@ core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_
 
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
-out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 2, 10, ...
-    [1 2 3 4 5 6 7 8], [1 2 3 4 5 6 7 8], 10000, ...
+out1 = analyzePriSwitches_v2(topology, Pmax, fsw, Ir_rms, 1, 8, ...
+    [], [1 2 3 4 5 6 7 8], 10000, ...
     'GaN Data tf.xlsx', 'SiC Data tf.xlsx');
 
+% out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 1, 8, ...
+%     [], [1 2 3 4 5 6 7 8], 10000, ...
+%     'GaN Data tf.xlsx', 'SiC Data tf.xlsx');
 
 %%  SECONDARY SIDE SWITCH ANALYSIS
 
 % Evaluate series-parallel combinations
 % Series: 4, 6, 8 devices    Parallel: 4, 6, 8 devices
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6]);
+out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
 
 % Calculate overall system efficiency and create pareto front including:
 %   - Transformer losses/area (core + copper)
@@ -282,15 +288,15 @@ out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6]);
 
 % Run enhanced efficiency calculation with table output and Pareto analysis:
 effOut = calcEfficiency_v3(out1, out2, "pareto", "pareto", ...
-    Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
+    Pmax, 0, 0);
 
 % Sweep with switching frequency
-f_sw_list = [300e3, 400e3, 500e3];
-freqSweepOut = compareParetoFreq( ...
-    f_sw_list, ...
-    Pmax, Ir_rms, ...
-    Pv_max_list, w_height_list, design_params, ...
-    makeMarkerMap(), 20, false);
+% f_sw_list = [300e3, 400e3, 500e3];
+% freqSweepOut = compareParetoFreq( ...
+%     f_sw_list, ...
+%     Pmax, Ir_rms, ...
+%     Pv_max_list, w_height_list, design_params, ...
+%     makeMarkerMap(), 20, false);
 
 % Access results:
 %   effOut.table          - Pareto front results table
