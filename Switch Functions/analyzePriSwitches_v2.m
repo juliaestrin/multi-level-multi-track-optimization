@@ -83,7 +83,7 @@ end
 
 % GaN indices
 idx.GaN.Rth_jc = 4;
-idx.GaN.Eloss  = 6;
+idx.GaN.Cool   = 5;
 idx.GaN.Coss   = 7;
 idx.GaN.L_min  = 8;
 idx.GaN.W_min  = 9;
@@ -95,7 +95,7 @@ idx.GaN.Vg     = 15;
 
 % SiC indices
 idx.SiC.Rth_jc = 4;
-idx.SiC.Eloss  = 10;
+idx.SiC.Cool   = 5;
 idx.SiC.Coss   = 11;
 idx.SiC.L_min  = 12;
 idx.SiC.W_min  = 13;
@@ -171,12 +171,12 @@ for ii_global = 1:n_sw
 
     Rth_jc   = T{ii, map.Rth_jc};
     R_ds_max = T{ii, map.Rds};
-    %E_loss   = T{ii, map.Eloss};
     Coss     = T{ii, map.Coss};
     t_f      = T{ii, map.tf};
     Q_g      = T{ii, map.Qg};
     V_g      = T{ii, map.Vg};
     T_j_max  = T{ii, map.Tjmax};
+    Cooling  = T{ii, map.Cool};
 
     % ---- footprint-dependent via/board thermal ----
     N_L = floor(L_min*0.1/(D_via+2*spacing));
@@ -203,7 +203,12 @@ for ii_global = 1:n_sw
         P_total(ii_global,k) = P_off(ii_global,k) + P_cond(ii_global,k) + P_gate(ii_global,k);
 
         Rth_pw    = R_plate * Area_plate / (L_min * W_min);
-        Rth_inter = 6*(0.6) / (L_min * W_min * 0.01);
+
+        if string(Cooling) == "Bottom"
+            Rth_inter = 6*(0.6) / (L_min * W_min * 0.01);
+        else
+            Rth_inter = 0;
+        end
 
         P_per_device = P_total(ii_global,k) / jj;
 

@@ -51,10 +51,14 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 topology    = "Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;           % [Hz]   Transformer frequency
+SiCData     = 'SiC Data Multitrack.xlsx';
+GaNData     = 'GaN Data Multitrack.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency
 % f0          = 2*fsw;        % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data tf.xlsx';
+% GaNData     = 'GaN Data tf.xlsx';
                             
 
 % --- LLC Resonant Tank Specifications ---
@@ -259,9 +263,9 @@ core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_
 
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
-out1 = analyzePriSwitches_v2(topology, Pmax, fsw, Ir_rms, 1, 8, ...
-    [], [1 2 3 4 5 6 7 8], 10000, ...
-    'GaN Data tf.xlsx', 'SiC Data tf.xlsx');
+out1 = analyzePriSwitches_v2(topology, Pmax, fsw, Ir_rms, 1, 6, ...
+    [], [1 2 3 4 5 6], 10000, ...
+    GaNData, SiCData);
 
 % out1 = analyzePriSwitches(Pmax, fsw, Ir_rms, 1, 8, ...
 %     [], [1 2 3 4 5 6 7 8], 10000, ...
