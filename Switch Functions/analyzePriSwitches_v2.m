@@ -347,7 +347,8 @@ if isempty(compare_list)
 end
 
 Loss_Area_plot = Area .* P_total_plot;
-best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list, Meta);
+best = pickBestDevices_v2(Area, P_total_plot, Loss_Area_plot, P_cond, P_off, P_gate, pri_sw_count, jj_set, compare_list, Meta);
+%best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list, Meta);
 
 %% ===================== Outputs =====================
 out = struct();
