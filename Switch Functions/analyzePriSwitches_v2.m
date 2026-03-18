@@ -187,7 +187,12 @@ for ii_global = 1:n_sw
     Area_fr4  = L_min*W_min - Area_vias;
     R_fr4     = 4350*1.6/Area_fr4;
 
-    Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
+    if string(Cooling) == "Top"
+        Rth_board_min = 0;
+    else
+        Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
+        fprintf("The thermal resistance of PCB is %d\n", Rth_board_min);
+    end 
 
     for k = 1:nJ
         jj = jj_set(k);
@@ -203,12 +208,7 @@ for ii_global = 1:n_sw
         P_total(ii_global,k) = P_off(ii_global,k) + P_cond(ii_global,k) + P_gate(ii_global,k);
 
         Rth_pw    = R_plate * Area_plate / (L_min * W_min);
-
-        if string(Cooling) == "Bottom"
-            Rth_inter = 6*(0.6) / (L_min * W_min * 0.01);
-        else
-            Rth_inter = 0;
-        end
+        Rth_inter = 6*(0.6) / (L_min * W_min * 0.01);
 
         P_per_device = P_total(ii_global,k) / jj;
 
