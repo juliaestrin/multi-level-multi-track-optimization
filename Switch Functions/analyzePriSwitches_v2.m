@@ -191,7 +191,7 @@ for ii_global = 1:n_sw
         Rth_board_min = 0;
     else
         Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
-        fprintf("The thermal resistance of PCB is %d\n", Rth_board_min);
+        %fprintf("The thermal resistance of PCB is %d\n", Rth_board_min);
     end 
 
     for k = 1:nJ

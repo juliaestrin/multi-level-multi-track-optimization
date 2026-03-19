@@ -78,7 +78,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
 
-stackup       = '5layer';   % Winding layer configuration
+stackup       = '5layer' ;   % Winding layer configuration
 % Supported configurations:
 %   '3layer'             - P-S-P
 %   '5layer'             - P-P-P-P-S (non-interleaved)
@@ -221,7 +221,13 @@ fprintf('  w_height range:   %.1f - %.1f mm (%d points)\n', ...
 fprintf('  Total designs:    %d\n', length(Pv_max_list) * length(w_height_list));
 
 % --- Run Optimization ---
-opt = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_params);
+T_tx_max = 220;
+
+opt = optimize_VIRT( ...
+    Pv_max_list, w_height_list, ...
+    h_core_max, T_tx_max, ...
+    R_plate, Area_plate, T_water, sig_grease, d_grease, ...
+    design_params);
 
 % --- Approximate Transformer Temp Rise ---
 T_tx = calculate_transformer_temp(opt.opt_design.P_total, opt.opt_design.Ac, opt.opt_design.h_core/2, R_plate, Area_plate, T_water, sig_grease, d_grease);

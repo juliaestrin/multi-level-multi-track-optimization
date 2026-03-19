@@ -1,6 +1,6 @@
 % Optimize VIRT Transformer Design over Pv_max and Window Height
 %
-% Author:  Julia Estrin
+% Author:  Julia Estrin, Qijia Li
 % Date:    02-17-2026
 %
 % Description:
@@ -43,7 +43,8 @@
 %   w_height_list = linspace(5e-3, 50e-3, 50);
 %   result = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
-function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_params)
+function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, T_tx_max, ...
+    R_plate, Area_plate, T_water, sig_grease, d_grease, design_params)
 
     %% Input Validation
     assert(~isempty(Pv_max_list),   'Pv_max_list must not be empty.');
@@ -67,8 +68,12 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_p
     for i = 1:n_Pv
         for j = 1:n_wh
            % des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
-           des = calculate_VIRT_design_v2(Pv_max_list(i), w_height_list(j), h_core_max, design_params);
-
+           % des = calculate_VIRT_design_v2(Pv_max_list(i), w_height_list(j), h_core_max, design_params);
+           des = calculate_VIRT_design_v3( ...
+                Pv_max_list(i), w_height_list(j), ...
+                h_core_max, T_tx_max, ...
+                R_plate, Area_plate, T_water, sig_grease, d_grease, ...
+                design_params);
 
             P_core_array(i,j)  = des.P_core;
             P_pri_array(i,j)   = des.P_pri;
@@ -83,9 +88,9 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_p
 
     %% Find Global Optimum
     if all(isnan(P_total_array(:)))
-    error('No feasible designs found: all designs violate h_core_max.');
+    error('No feasible designs found.');
     end
-    
+
     [P_total_min, linear_idx] = min(P_total_array(:), [], 'omitnan');
     [idx_Pv_opt, idx_wh_opt]     = ind2sub(size(P_total_array), linear_idx);
 
