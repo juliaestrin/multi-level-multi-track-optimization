@@ -92,6 +92,7 @@ stackup       = '5layer';   % Winding layer configuration
 w_b         = 4e-3;         % [m]    Winding window breadth (depth into page)
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
+h_core_max  = 24e-3;        % [m]
 
 % --- Heat Sink Parameters ---
 % PN: 180-10-6C
@@ -220,7 +221,7 @@ fprintf('  w_height range:   %.1f - %.1f mm (%d points)\n', ...
 fprintf('  Total designs:    %d\n', length(Pv_max_list) * length(w_height_list));
 
 % --- Run Optimization ---
-opt = optimize_VIRT(Pv_max_list, w_height_list, design_params);
+opt = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_params);
 
 % --- Approximate Transformer Temp Rise ---
 T_tx = calculate_transformer_temp(opt.opt_design.P_total, opt.opt_design.Ac, opt.opt_design.h_core/2, R_plate, Area_plate, T_water, sig_grease, d_grease);

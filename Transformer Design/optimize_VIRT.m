@@ -43,7 +43,7 @@
 %   w_height_list = linspace(5e-3, 50e-3, 50);
 %   result = optimize_VIRT(Pv_max_list, w_height_list, design_params);
 
-function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
+function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, design_params)
 
     %% Input Validation
     assert(~isempty(Pv_max_list),   'Pv_max_list must not be empty.');
@@ -67,7 +67,7 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     for i = 1:n_Pv
         for j = 1:n_wh
            % des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
-           des = calculate_VIRT_design(Pv_max_list(i), w_height_list(j), design_params);
+           des = calculate_VIRT_design_v2(Pv_max_list(i), w_height_list(j), h_core_max, design_params);
 
 
             P_core_array(i,j)  = des.P_core;
@@ -82,7 +82,11 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     end
 
     %% Find Global Optimum
-    [P_total_min, linear_idx]    = min(P_total_array(:));
+    if all(isnan(P_total_array(:)))
+    error('No feasible designs found: all designs violate h_core_max.');
+    end
+    
+    [P_total_min, linear_idx] = min(P_total_array(:), [], 'omitnan');
     [idx_Pv_opt, idx_wh_opt]     = ind2sub(size(P_total_array), linear_idx);
 
     Pv_max_opt    = Pv_max_list(idx_Pv_opt);
@@ -92,7 +96,7 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, design_params)
     P_copper_min  = P_pri_array(idx_Pv_opt, idx_wh_opt) + P_sec_array(idx_Pv_opt, idx_wh_opt);
 
     % Re-run design at optimum to get full geometry and loss breakdown
-    opt_design = calculate_VIRT_design(Pv_max_opt, w_height_opt, design_params);
+    opt_design = calculate_VIRT_design_v2(Pv_max_opt, w_height_opt, h_core_max, design_params);
 
     %% Package Results
     result = struct( ...
