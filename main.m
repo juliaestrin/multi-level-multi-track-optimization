@@ -78,6 +78,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
 
+centerpost_shape = 'round'; 
 stackup       = '5layer' ;   % Winding layer configuration
 % Supported configurations:
 %   '3layer'             - P-S-P
@@ -203,7 +204,8 @@ design_params = struct( ...
     'w_scale',  w_scale,    ...  % Winding width scale factor
     't_cu_pri', t_cu_pri,   ...  % Primary copper thickness
     't_cu_sec', t_cu_sec,   ...  % Secondary copper thickness
-    'stackup',  stackup     ...  % Winding layer configuration
+    'stackup',  stackup,     ...  % Winding layer configuration
+    'centerpost_shape',  centerpost_shape     ...  % Winding layer configuration
 );
 
 % --- Define Optimization Sweep Ranges ---
