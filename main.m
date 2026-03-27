@@ -25,7 +25,6 @@
 %   - 2D optimization sweep over Pv_max and window height
 %   - Pareto front analysis for switch selection
 
-
 clear; close all; clc;
 
 fprintf('MULTILEVEL MULTITRACK CONVERTER DESIGN\n');
@@ -48,17 +47,17 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 
 % --- Frequency Selection ---
-topology    = "Multitrack";
-fsw         = 1000e3;        % [Hz]   FCML switching frequency
-f0          = fsw;           % [Hz]   Transformer frequency
-SiCData     = 'SiC Data Multitrack.xlsx';
-GaNData     = [];
+% topology    = "Multitrack";
+% fsw         = 1000e3;        % [Hz]   FCML switching frequency
+% f0          = fsw;           % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data Multitrack.xlsx';
+% GaNData     = [];
 
-% topology    = "Multilevel Multitrack";
-% fsw         = 500e3;        % [Hz]   FCML switching frequency
-% f0          = 2*fsw;        % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data tf.xlsx';
-% GaNData     = 'GaN Data tf.xlsx';
+topology    = "Multilevel Multitrack";
+fsw         = 500e3;        % [Hz]   FCML switching frequency
+f0          = 2*fsw;        % [Hz]   Transformer frequency
+SiCData     = 'SiC Data tf.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
                             
 
 % --- LLC Resonant Tank Specifications ---
@@ -73,20 +72,21 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_h_max       = 10e-3;      % [m]    Maximum window height constraint
+w_h_max       = 100e-3;      % [m]    Maximum window height constraint
 w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
 
 centerpost_shape = 'round'; 
 stackup       = '5layer' ;   % Winding layer configuration
-% Supported configurations:
-%   '3layer'             - P-S-P
-%   '5layer'             - P-P-P-P-S (non-interleaved)
-%   '6layer'             - P-P-S-S-P-P (non-interleaved)
-%   '6layer_interleaved' - P-S-P-P-S-P
-%   '7layer_interleaved' - P-S-P-S-P-S-P
-%   '8layer_interleaved' - P-S-P-S-P-S-P-S
+%   Supported stackup configurations:
+%     '3layer'             - 3-layer: P-S-P
+%     '5layer'             - 5-layer: P-P-P-P-S
+%     '5layer_interleaved' - 5-layer interleaved: P-P-S-P-P
+%     '6layer'             - 6-layer non-interleaved: P-P-S-S-P-P
+%     '6layer_interleaved' - 6-layer interleaved: P-S-P-P-S-P
+%     '7layer_interleaved' - 7-layer interleaved: P-S-P-S-P-S-P
+%     '8layer_interleaved' - 8-layer interleaved: P-S-P-S-P-S-P-S
 
 
 % --- Transformer Fixed Parameters ---

@@ -28,7 +28,7 @@
 % Usage Example:
 %   Rdc = calculate_Rdc_summation(5, 0.01, 0.05, 0.01, 0.05, 5.8e7, 35e-6);
 
-function Rdc = calculate_Rdc_summation(n, a_0, a_n, b_0, b_n, sig_cu, t_cu)
+function Rdc = calculate_Rdc_rectangle(n, a_0, a_n, b_0, b_n, sig_cu, t_cu)
 
     % --- Geometry: conductor width increments per turn ---
     % dx and dy represent the width of each conductor strip in x and y,

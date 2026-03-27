@@ -5,6 +5,7 @@
 % Updated: 02-27-2026 - Corrected calculation for core area and air gap
 % Updated: 03-20-2026 - Added thermal limit (Qijia) 
 % Updated: 03-27-2026 - Select round vs square centerpost/winding
+%                     - Shape-dependent Rdc calculation
 %
 % Description:
 %   Designs an E-core planar transformer for a 1/2-turn VIRT topology.
@@ -75,8 +76,9 @@ function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, 
     R_plate, Area_plate, T_water, sig_grease, d_grease, params)
 
     % Input Validation
-    centerpost_shape = params.centerpost_shape; 
-    if nargin < 10
+    if isfield(params, 'centerpost_shape')
+        centerpost_shape = params.centerpost_shape;
+    else
         centerpost_shape = 'square';  % Default to square (original behavior)
     end
     
@@ -186,16 +188,33 @@ function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, 
     %% Core Loss
     P_core = V_total * params.k * params.f^params.alpha * Bmax^params.beta;
 
-    %% DC Resistance
-    Rdc_pri = calculate_Rdc_summation(100, ...
-        w_core, l_winding, ...
-        w_core, w_winding, ...
-        params.sigma_cu, params.t_cu_pri);
+    %% DC Resistance (shape-dependent)
+    if strcmp(centerpost_shape, 'round')
+        % Round winding: annular geometry
+        % Inner radius = centerpost radius
+        % Outer radius = centerpost radius + window height
+        r_inner = r_centerpost;
+        r_outer = r_centerpost + w_height;
+        
+        Rdc_pri = calculate_Rdc_round(100, ...
+            r_inner, r_outer, ...
+            params.sigma_cu, params.t_cu_pri);
 
-    Rdc_sec = calculate_Rdc_summation(100, ...
-        w_core, l_winding, ...
-        w_core, w_winding, ...
-        params.sigma_cu, params.t_cu_sec);
+        Rdc_sec = calculate_Rdc_round(100, ...
+            r_inner, r_outer, ...
+            params.sigma_cu, params.t_cu_sec);
+    else
+        % Square winding: rectangular geometry
+        Rdc_pri = calculate_Rdc_rectangle(100, ...
+            w_core, l_winding, ...
+            w_core, w_winding, ...
+            params.sigma_cu, params.t_cu_pri);
+
+        Rdc_sec = calculate_Rdc_rectangle(100, ...
+            w_core, l_winding, ...
+            w_core, w_winding, ...
+            params.sigma_cu, params.t_cu_sec);
+    end
 
     %% AC Copper Loss
     [P_pri, P_sec] = calculate_Pcond( ...
