@@ -48,17 +48,17 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 
 % --- Frequency Selection ---
-topology    = "Multitrack";
-fsw         = 1000e3;        % [Hz]   FCML switching frequency
-f0          = fsw;           % [Hz]   Transformer frequency
-SiCData     = 'SiC Data Multitrack.xlsx';
-GaNData     = [];
+% topology    = "Multitrack";
+% fsw         = 1000e3;        % [Hz]   FCML switching frequency
+% f0          = fsw;           % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data Multitrack.xlsx';
+% GaNData     = [];
 
-% topology    = "Multilevel Multitrack";
-% fsw         = 500e3;        % [Hz]   FCML switching frequency
-% f0          = 2*fsw;        % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data tf.xlsx';
-% GaNData     = 'GaN Data tf.xlsx';
+topology    = "Multilevel Multitrack";
+fsw         = 500e3;        % [Hz]   FCML switching frequency
+f0          = 2*fsw;        % [Hz]   Transformer frequency
+SiCData     = 'SiC Data tf.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
                             
 
 % --- LLC Resonant Tank Specifications ---
@@ -78,7 +78,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
 
-stackup       = '5layer' ;   % Winding layer configuration
+stackup       =  '5layer' ;   % Winding layer configuration
 % Supported configurations:
 %   '3layer'             - P-S-P
 %   '5layer'             - P-P-P-P-S (non-interleaved)
@@ -221,7 +221,7 @@ fprintf('  w_height range:   %.1f - %.1f mm (%d points)\n', ...
 fprintf('  Total designs:    %d\n', length(Pv_max_list) * length(w_height_list));
 
 % --- Run Optimization ---
-T_tx_max = 220;
+T_tx_max = 150;
 
 opt = optimize_VIRT( ...
     Pv_max_list, w_height_list, ...
