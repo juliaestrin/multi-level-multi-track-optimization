@@ -46,17 +46,17 @@ Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- Topology/Frequency Selection ---
-% topology    = "Multitrack";
-% fsw         = 1000e3;        % [Hz]   FCML switching frequency
-% f0          = fsw;           % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data Multitrack.xlsx';
-% GaNData     = [];
+topology    = "Multitrack";
+fsw         = 1000e3;        % [Hz]   FCML switching frequency
+f0          = fsw;           % [Hz]   Transformer frequency
+SiCData     = 'SiC Data Multitrack.xlsx';
+GaNData     = [];
 
-topology    = "Multilevel Multitrack";
-fsw         = 500e3;        % [Hz]   FCML switching frequency
-f0          = 2*fsw;        % [Hz]   Transformer frequency
-SiCData     = 'SiC Data tf.xlsx';
-GaNData     = 'GaN Data tf.xlsx';
+% topology    = "Multilevel Multitrack";
+% fsw         = 500e3;        % [Hz]   FCML switching frequency
+% f0          = 2*fsw;        % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data tf.xlsx';
+% GaNData     = 'GaN Data tf.xlsx';
                             
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)

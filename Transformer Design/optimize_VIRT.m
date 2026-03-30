@@ -67,7 +67,15 @@ function result = optimize_VIRT(Pv_max_list, w_height_list, h_core_max, T_tx_max
     %% Parameter Sweep
     for i = 1:n_Pv
         for j = 1:n_wh
-
+            
+            % Design the VIRT structure
+            des = calculate_VIRT_design( ...
+                Pv_max_list(i), w_height_list(j), ...
+                h_core_max, T_tx_max, ...
+                R_plate, Area_plate, T_water, sig_grease, d_grease, ...
+                design_params);
+            
+            % Store results in the corresponding arrays
             P_core_array(i,j)  = des.P_core;
             P_pri_array(i,j)   = des.P_pri;
             P_sec_array(i,j)   = des.P_sec;
