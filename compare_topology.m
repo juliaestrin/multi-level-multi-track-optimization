@@ -40,17 +40,33 @@ percentReg  = 0.1;          % [-]    Line regulation tolerance
 f_per       = 0.25;         % [-]    Frequency range
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
-% --- Transformer Design Specifications ---
-material_name = 'F80';
-w_h_max       = 10e-3;      % [m]
-w_scale       = 1;
-stackup       = '5layer';
+material_name = 'F80';      % Core material selection
+                            % Options: 'ML91S' (high freq), 'F80' (general),
+                            %          'N87', 'N97', '3F4'
+
+w_h_max       = 20e-3;      % [m]    Maximum window height constraint
+w_scale       = 1;          % [-]    Winding width scale factor
+                            %        1.0 = square winding (w = l)
+                            %        0.5 = rectangular (w = 0.5*l)
+h_core_max  = 100e-3;       % [m]
+
+centerpost_shape = 'round'; 
+stackup       = '5layer_interleaved' ;   % Winding layer configuration
+%   Supported stackup configurations:
+%     '3layer'             - 3-layer: P-S-P
+%     '5layer'             - 5-layer: P-P-P-P-S
+%     '5layer_interleaved' - 5-layer interleaved: P-P-S-P-P
+%     '6layer'             - 6-layer non-interleaved: P-P-S-S-P-P
+%     '6layer_interleaved' - 6-layer interleaved: P-S-P-P-S-P
+%     '7layer_interleaved' - 7-layer interleaved: P-S-P-S-P-S-P
+%     '8layer_interleaved' - 8-layer interleaved: P-S-P-S-P-S-P-S
+
 
 % --- Transformer Fixed Parameters ---
 w_b         = 4e-3;         % [m]
 t_cu_pri    = 2 * 35e-6;    % [m]
 t_cu_sec    = 2 * 35e-6;    % [m]
-h_core_max  = 24e-3;        % [m]
+
 
 % --- Heat Sink Parameters ---
 R_plate = 0.08; % [C/W]
@@ -179,27 +195,28 @@ for ii = 1:nTopo
     fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
     %% ---------- PACKAGE DESIGN PARAMETERS ----------
+    % Bundle all transformer design parameters into a struct
     design_params = struct( ...
-        'Vo',       Vo_nom,     ...
-        'nt',       nt,         ...
-        'Lu',       Lu,         ...
-        'I',        Ir_pk,      ...
-        'f',        f0,         ...
-        'Np',       Np,         ...
-        'k',        k,          ...
-        'beta',     beta,       ...
-        'alpha',    alpha,      ...
-        'uc',       uc,         ...
-        'rho_cu',   rho_cu,     ...
-        'sigma_cu', sigma_cu,   ...
-        'u0',       u0,         ...
-        'w_b',      w_b,        ...
-        'w_scale',  w_scale,    ...
-        't_cu_pri', t_cu_pri,   ...
-        't_cu_sec', t_cu_sec,   ...
-        'stackup',  stackup     ...
+        'Vo',       Vo_nom,     ...  % Output voltage per track
+        'nt',       nt,         ...  % Number of secondary tracks
+        'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
+        'I',        Ir_pk,      ...  % Peak primary current
+        'f',        f0,         ...  % Operating frequency (transformer core)
+        'Np',       Np,         ...  % Primary turns per track
+        'k',        k,          ...  % Steinmetz coefficient
+        'beta',     beta,       ...  % Steinmetz exponent
+        'alpha',    alpha,      ...  % Steinmetz alpha (for modified Steinmetz)
+        'uc',       uc,         ...  % Core relative permeability
+        'rho_cu',   rho_cu,     ...  % Copper resistivity
+        'sigma_cu', sigma_cu,   ...  % Copper conductivity
+        'u0',       u0,         ...  % Permeability of free space
+        'w_b',      w_b,        ...  % Window breadth
+        'w_scale',  w_scale,    ...  % Winding width scale factor
+        't_cu_pri', t_cu_pri,   ...  % Primary copper thickness
+        't_cu_sec', t_cu_sec,   ...  % Secondary copper thickness
+        'stackup',  stackup,     ...  % Winding layer configuration
+        'centerpost_shape',  centerpost_shape     ...  % Winding layer configuration
     );
-
     %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
     fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
