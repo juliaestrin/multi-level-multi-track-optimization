@@ -35,7 +35,7 @@ addpath('Transformer Design');   % VIRT transformer design functions
 addpath('LLC Design');           % LLC resonant tank design functions
 
 
-%  DESIGN SPECIFICATIONS
+%%  DESIGN SPECIFICATIONS
 fprintf('\n--- Design Specifications ---\n');
 
 % --- Electrical Specifications ---
@@ -45,8 +45,7 @@ nt          = 2;            % [-]    Number of primary tracks (series connection
 Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
-
-% --- Frequency Selection ---
+% --- Topology/Frequency Selection ---
 % topology    = "Multitrack";
 % fsw         = 1000e3;        % [Hz]   FCML switching frequency
 % f0          = fsw;           % [Hz]   Transformer frequency
@@ -59,7 +58,6 @@ f0          = 2*fsw;        % [Hz]   Transformer frequency
 SiCData     = 'SiC Data tf.xlsx';
 GaNData     = 'GaN Data tf.xlsx';
                             
-
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
 percentReg  = 0.1;          % [-]    Line regulation tolerance (±10%)
@@ -72,13 +70,14 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_h_max       = 100e-3;      % [m]    Maximum window height constraint
+w_h_max       = 20e-3;      % [m]    Maximum window height constraint
 w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
+h_core_max  = 100e-3;       % [m]
 
 centerpost_shape = 'round'; 
-stackup       = '5layer' ;   % Winding layer configuration
+stackup       = '8layer_interleaved' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
@@ -93,7 +92,7 @@ stackup       = '5layer' ;   % Winding layer configuration
 w_b         = 4e-3;         % [m]    Winding window breadth (depth into page)
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
-h_core_max  = 24e-3;        % [m]
+
 
 % --- Heat Sink Parameters ---
 % PN: 180-10-6C
@@ -341,3 +340,7 @@ effOut = calcEfficiency_v3(out1, out2, "pareto", "pareto", ...
 %   effOut.points         - Individual design points
 %   opt.opt_design        - Optimal transformer design struct
 %   LLC_design            - LLC resonant tank design
+%%
+
+design_summary_figure(topology, Vin_nom, Vo_nom, Pmax, fsw, f0, nt, ...
+       LLC_design, opt, material, stackup, t_cu_pri, t_cu_sec, T_tx);

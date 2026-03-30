@@ -1,4 +1,4 @@
-% Calculate Winding Conduction Loss for Various VIRT Stackup Configurations
+% Calculate Winding Conduction Loss for Various 4:1/2 VIRT Stackup Configurations
 %
 % Author:  Julia Estrin
 % Date:    02-12-2026
@@ -15,7 +15,7 @@
 %   where d = t_cu / skin_depth (normalized copper thickness).
 %
 %   Supported stackup configurations:
-%     '3layer'             - 3-layer: P-S-P
+%     '3layer'             - 3-layer: 2P-S-2P
 %     '5layer'             - 5-layer: P-P-P-P-S
 %     '5layer_interleaved' - 5-layer interleaved: P-P-S-P-P
 %     '6layer'             - 6-layer non-interleaved: P-P-S-S-P-P
