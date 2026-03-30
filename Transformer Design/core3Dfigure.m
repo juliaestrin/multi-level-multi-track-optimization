@@ -26,7 +26,7 @@
 
 function core3Dfigure(result, Pv_max, w_height, material, T_tx)
 
-    figure(1);
+    figure();
     clf;
     hold on;
     axis equal;

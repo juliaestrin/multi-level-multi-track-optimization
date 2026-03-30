@@ -15,8 +15,8 @@
 %   7. Overlay pareto plots with distinct markers/colors
 
 clear; close all; clc;
-
-fprintf('MULTILEVEL MULTITRACK CONVERTER DESIGN\n');
+clf;
+%fprintf('MULTILEVEL MULTITRACK CONVERTER DESIGN\n');
 
 %% ========================= SETUP =========================
 addpath('Switch Functions');
@@ -44,11 +44,11 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_h_max       = 20e-3;      % [m]    Maximum window height constraint
+w_h_max       = 120e-3;      % [m]    Maximum window height constraint
 w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
-h_core_max  = 100e-3;       % [m]
+h_core_max  = 50e-3;       % [m]
 
 centerpost_shape = 'round'; 
 stackup       = '5layer_interleaved' ;   % Winding layer configuration
