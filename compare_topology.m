@@ -185,6 +185,7 @@ for ii = 1:nTopo
     Ir_pk  = Ir_rms * sqrt(2);
     N      = LLC_design.N;
     Np     = N / nt;
+    Np_temp(ii) = Np; 
 
 
     fprintf('  Turns ratio:      %d:1\n', N);

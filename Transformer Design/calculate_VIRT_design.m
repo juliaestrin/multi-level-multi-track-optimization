@@ -199,6 +199,12 @@ function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, 
         % Outer radius = centerpost radius + window height
         r_inner = r_centerpost;
         r_outer = r_centerpost + w_height;
+
+        % account for turn to turn spacing in Multitrack converter for
+        % turns on same layer 
+        if params.topology == "Multitrack"
+            r_outer = r_outer - 1e-3; 
+        end 
         
         Rdc_pri = calculate_Rdc_round(100, ...
             r_inner, r_outer, ...
