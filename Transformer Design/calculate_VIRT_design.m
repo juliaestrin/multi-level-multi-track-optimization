@@ -31,7 +31,7 @@
 %                 .k        - Steinmetz coefficient k  (P = k * B^beta)
 %                 .beta     - Steinmetz exponent beta
 %                 .Lu       - Inductance requirement per track [H]
-%                 .I        - Peak/RMS winding current [A]
+%                 .I        - Peak winding current [A]
 %                 .Np       - Number of primary turns
 %                 .nt       - Number of secondary tracks
 %                 .Vo       - Output voltage per track [V]
@@ -74,6 +74,10 @@
 
 function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease, params)
+
+    if params.topology == "Multitrack"
+        params.I = 2*params.I;
+    end 
 
     % Input Validation
     if isfield(params, 'centerpost_shape')

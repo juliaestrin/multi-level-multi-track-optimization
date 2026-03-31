@@ -186,10 +186,6 @@ for ii = 1:nTopo
     N      = LLC_design.N;
     Np     = N / nt;
 
-     if topology == "Multitrack"
-        Ir_rms = 2*Ir_rms;
-        Ir_pk = 2*Ir_pk; 
-    end   
 
     fprintf('  Turns ratio:      %d:1\n', N);
     fprintf('  Np:1/2:           %d turns\n', Np);
@@ -203,6 +199,7 @@ for ii = 1:nTopo
     %% ---------- PACKAGE DESIGN PARAMETERS ----------
     % Bundle all transformer design parameters into a struct
     design_params = struct( ...
+        'topology',  topology,  ...  % topology
         'Vo',       Vo_nom,     ...  % Output voltage per track
         'nt',       nt,         ...  % Number of secondary tracks
         'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
@@ -261,13 +258,8 @@ for ii = 1:nTopo
     % end
 
     %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
-    fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
+    fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n'); 
 
-     if topology == "Multitrack"
-        Ir_rms = 1/2*Ir_rms;
-        Ir_pk = 1/2*Ir_pk; 
-     end  
-     
     out1 = analyzePriSwitches_v2(topology, Pmax, fsw, Ir_rms, 1, 8, ...
         [], [1 2 3 4 5 6 7 8], 10000, GaNData, SiCData);
 

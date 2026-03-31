@@ -24,7 +24,7 @@
 %     '8layer_interleaved' - 8-layer interleaved: P-S-P-S-P-S-P-S
 %
 % Inputs:
-%   I         - RMS winding current [A]
+%   I         - Peak winding current [A]
 %   f         - Switching frequency [Hz]
 %   Rdc_pri   - Primary winding DC resistance [Ohm]
 %   Rdc_sec   - Secondary winding DC resistance [Ohm]
