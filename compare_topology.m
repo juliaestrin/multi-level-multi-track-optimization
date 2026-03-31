@@ -44,7 +44,7 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_h_max       = 120e-3;      % [m]    Maximum window height constraint
+w_h_max       = 20e-3;      % [m]    Maximum window height constraint
 w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
@@ -169,7 +169,7 @@ for ii = 1:nTopo
     fprintf('\n====================================================\n');
     fprintf('RUNNING TOPOLOGY: %s\n', topology);
     fprintf('====================================================\n');
-    fprintf('  fsw (FCML):       %.0f kHz\n', fsw / 1e3);
+    fprintf('  fsw :       %.0f kHz\n', fsw / 1e3);
     fprintf('  f0 (transformer): %.1f MHz\n', f0 / 1e6);
 
     %% ---------- LLC RESONANT TANK DESIGN ----------
@@ -177,13 +177,19 @@ for ii = 1:nTopo
 
     LLC_design = designLLC_v2(topology, Vin_nom, Vo_nom, Mg_nom, nt, ...
         percentReg, fsw, f_per, Pmax, Pmin, Ln);
-
+    
+    
     Lu     = LLC_design.Lm;
     Llk    = LLC_design.Lr;
     Ir_rms = LLC_design.Ir_rms;
     Ir_pk  = Ir_rms * sqrt(2);
     N      = LLC_design.N;
     Np     = N / nt;
+
+     if topology == "Multitrack"
+        Ir_rms = 2*Ir_rms;
+        Ir_pk = 2*Ir_pk; 
+    end   
 
     fprintf('  Turns ratio:      %d:1\n', N);
     fprintf('  Np:1/2:           %d turns\n', Np);
@@ -244,16 +250,24 @@ for ii = 1:nTopo
     fprintf('  P_total:          %.2f W\n', opt.P_total_min);
     fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
-    try
-        core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
-            sprintf('%s - %s', material.name, topology), T_tx);
-    catch ME
-        warning('core3Dfigure failed for topology %s: %s', topology, ME.message);
-    end
+    core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
+            sprintf('%s - %s', material.name, topology), T_tx,ii);
+    
+    % try
+    %     core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
+    %         sprintf('%s - %s', material.name, topology), T_tx, ii);
+    % catch ME
+    %     warning('core3Dfigure failed for topology %s: %s', topology, ME.message);
+    % end
 
     %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
     fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
 
+     if topology == "Multitrack"
+        Ir_rms = 1/2*Ir_rms;
+        Ir_pk = 1/2*Ir_pk; 
+     end  
+     
     out1 = analyzePriSwitches_v2(topology, Pmax, fsw, Ir_rms, 1, 8, ...
         [], [1 2 3 4 5 6 7 8], 10000, GaNData, SiCData);
 
