@@ -186,6 +186,7 @@ fprintf('  uc:               %d\n', uc);
 % --- Package Design Parameters ---
 % Bundle all transformer design parameters into a struct
 design_params = struct( ...
+    'topology',  topology,   ...
     'Vo',       Vo_nom,     ...  % Output voltage per track
     'nt',       nt,         ...  % Number of secondary tracks
     'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
@@ -247,7 +248,7 @@ fprintf('  P_total:          %.2f W\n', opt.P_total_min);
 fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
 % --- Generate 3D Visualization ---
-core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_tx);
+core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_tx,1);
 
 % --- Parasitic Capacitance and Resonance Check (Optional) ---
 % Uncomment to calculate primary-to-secondary capacitance and verify
