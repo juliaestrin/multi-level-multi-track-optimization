@@ -46,17 +46,17 @@ Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- Topology/Frequency Selection ---
-topology    = "Multitrack";
-fsw         = 1000e3;        % [Hz]   FCML switching frequency
-f0          = fsw;           % [Hz]   Transformer frequency
-SiCData     = 'SiC Data Multitrack.xlsx';
-GaNData     = [];
+% topology    = "Multitrack";
+% fsw         = 1000e3;        % [Hz]   FCML switching frequency
+% f0          = fsw;           % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data Multitrack.xlsx';
+% GaNData     = [];
 
-% topology    = "Multilevel Multitrack";
-% fsw         = 500e3;        % [Hz]   FCML switching frequency
-% f0          = 2*fsw;        % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data tf.xlsx';
-% GaNData     = 'GaN Data tf.xlsx';
+topology    = "Multilevel Multitrack";
+fsw         = 500e3;        % [Hz]   FCML switching frequency
+f0          = 2*fsw;        % [Hz]   Transformer frequency
+SiCData     = 'SiC Data tf.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
                             
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
@@ -77,7 +77,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
 h_core_max  = 100e-3;       % [m]
 
 centerpost_shape = 'round'; 
-stackup       = '8layer_interleaved' ;   % Winding layer configuration
+stackup       = '5layer' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
@@ -148,11 +148,11 @@ Lu     = LLC_design.Lm;         % [H]  Magnetizing inductance
 Llk    = LLC_design.Lr;         % [H]  Resonant (leakage) inductance
 Ir_rms = LLC_design.Ir_rms;     % [A]  Primary RMS current (worst case)
 Ir_pk  = Ir_rms * sqrt(2);      % [A]  Primary peak current
-N      = LLC_design.N;          % [-]  Turns ratio (primary:secondary)
-Np     = N / nt;                % [-]  Primary turns per track
+n      = LLC_design.N;          % [-]  Turns ratio (primary:secondary)
+np     = n / nt;                % [-]  Track turns ratio 
 
-fprintf('  Turns ratio:      %d:1\n', N);
-fprintf('  Np:1/2:           %d turns\n', Np);
+fprintf('  Turns ratio:      %d:1\n', n);
+fprintf('  Np:1/2:           %d turns\n', np);
 fprintf('  Lr (resonant):    %.4f µH\n', Llk * 1e6);
 fprintf('  Lm (magnetizing): %.4f µH\n', Lu * 1e6);
 fprintf('  Cr:               %.4f µF\n', LLC_design.Cr * 1e6);
@@ -186,12 +186,13 @@ fprintf('  uc:               %d\n', uc);
 % --- Package Design Parameters ---
 % Bundle all transformer design parameters into a struct
 design_params = struct( ...
+    'topology', topology,...
     'Vo',       Vo_nom,     ...  % Output voltage per track
     'nt',       nt,         ...  % Number of secondary tracks
     'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
     'I',        Ir_pk,      ...  % Peak primary current
     'f',        f0,         ...  % Operating frequency (transformer core)
-    'Np',       Np,         ...  % Primary turns per track
+    'np',       np,         ...  % Primary turns ratio per track
     'k',        k,          ...  % Steinmetz coefficient
     'beta',     beta,       ...  % Steinmetz exponent
     'alpha',    alpha,      ...  % Steinmetz alpha (for modified Steinmetz)
@@ -247,7 +248,7 @@ fprintf('  P_total:          %.2f W\n', opt.P_total_min);
 fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
 % --- Generate 3D Visualization ---
-core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_tx);
+VIRT3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, material.name, T_tx, 0 );
 
 % --- Parasitic Capacitance and Resonance Check (Optional) ---
 % Uncomment to calculate primary-to-secondary capacitance and verify

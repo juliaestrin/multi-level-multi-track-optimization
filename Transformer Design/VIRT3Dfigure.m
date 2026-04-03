@@ -28,10 +28,12 @@
 %   core3Dfigure(result1, Pv_max1, w_height1, material1, T_tx1, 1);
 %   core3Dfigure(result2, Pv_max2, w_height2, material2, T_tx2, 2);
 
-function core3Dfigure(result, Pv_max, w_height, material, T_tx, idx)
+function VIRT3Dfigure(result, Pv_max, w_height, material, T_tx, idx)
     figure(1)
     % --- Select subplot based on idx ---
-    subplot(2, 1, idx);
+    if idx == ~0
+        subplot(2, 1, idx);
+    end 
     cla;  % Clear current axes instead of clf
     hold on;
     axis equal;

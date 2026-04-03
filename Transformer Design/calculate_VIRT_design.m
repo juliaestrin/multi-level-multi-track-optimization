@@ -19,9 +19,9 @@
 %     - Yoke area = leg area  =>  h_yoke = l_leg
 %     - Center Leg gap
 %   Magnetic circuit model (updated 02-27-2026):
-%     - Square wave voltage Vso = Np * nt * Vo generated across primaries
-%     - Peak triangular flux: Ac = Vso / (4 * f * Np * Bmax)
-%     - Air gap: lg = u0 * Np^2 * Ac / (nt * Lu)
+%     - Square wave voltage Vso = np * nt * Vo generated across primaries
+%     - Peak triangular flux: Ac = Vso / (4 * f * np * Bmax)
+%     - Air gap: lg = u0 * np^2 * Ac / (nt * Lu)
 %     - Factor nt accounts for tracks in series
 %
 % Inputs:
@@ -32,7 +32,7 @@
 %                 .beta     - Steinmetz exponent beta
 %                 .Lu       - Inductance requirement per track [H]
 %                 .I        - Peak winding current [A]
-%                 .Np       - Number of primary turns
+%                 .np       - Number of primary turns
 %                 .nt       - Number of secondary tracks
 %                 .Vo       - Output voltage per track [V]
 %                 .w_b      - Winding breadth (window width) [m]
@@ -69,9 +69,6 @@
 %                 .P_total      - Total loss (core + primary + secondary) [W]
 %                 .Cps          - Primary-to-secondary parasitic capacitance [F]
 
-
-
-
 function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease, params)
 
@@ -97,14 +94,15 @@ function result = calculate_VIRT_design(Pv_max, w_height, h_core_max, T_tx_max, 
     %% Core Geometry
     % Square wave voltage with amplitude Vso generated across sum of
     % primaries for nt tracks
-    Vso = params.Np * params.nt * params.Vo;
+    % Vso = params.np * params.nt * params.Vo;
 
     % For a peak triangular flux density, the minimum core area required is:
-    Ac = Vso / (4 * params.f * params.Np * Bmax);
+    % Ac = Vso / (4 * params.f * params.np * Bmax);
+    Ac = 2  * params.Vo / (4 * params.f * Bmax);
 
     % Air gap on center leg
     % For nt tracks in series, total inductance is nt*Lu
-    lg = params.u0 * params.Np^2 * Ac / (params.nt * params.Lu);
+    lg = params.u0 * params.np^2 * Ac / (params.nt * params.Lu);
 
     %% Centerpost Geometry (shape-dependent)
     if strcmp(centerpost_shape, 'round')

@@ -47,6 +47,7 @@ function params = get_core_material(material_name)
             params.beta = 2.549625682;
             params.alpha = 2.15651264669503;
             params.uc   = 600;
+            params.Bsat = 0.3; % [T]
             params.name = 'Fairite 80';
         
               
