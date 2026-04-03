@@ -1,7 +1,7 @@
 % Design LLC Resonant Converter for FCML VIRT Topology
 %
-% Author:  Julia Estrin
-% Date:    02-27-2026
+% Author:  Julia Estrin, Qijia Li
+% Date:    03-10-2026
 %
 % Description:
 %   Designs an LLC resonant tank for a Flying Capacitor Multilevel (FCML)
@@ -10,7 +10,7 @@
 %   requirements across the full load and line regulation range.
 %
 %   Key features:
-%     - Accounts for FCML frequency doubling (f0 = 2*fsw)
+%     - Accounts for different topologies
 %     - Multi-track secondary (nt tracks)
 %     - Constrained Qe_max to ensure peak gain occurs at fn <= fn_min
 %     - Validates gain curve stays within Mg_min/Mg_max bounds
@@ -19,7 +19,7 @@
 %   Vin_nom     - Nominal input voltage [V]
 %   Vo_nom      - Nominal output voltage [V]
 %   Mg_nom      - Nominal LLC gain (typically 1.0)
-%   nt          - Number of secondary tracks
+%   nt          - Number of primary tracks
 %   percentReg  - Line regulation tolerance (e.g., 0.1 for ±10%)
 %   fsw         - FCML switching frequency [Hz]
 %   f_per       - Frequency range percentage (e.g., 0.25 for ±25%)
@@ -46,29 +46,50 @@
 % Usage Example:
 %   result = designLLC(1500, 48, 1.0, 2, 0.1, 500e3, 0.25, 6.25e3, 625, 5);
 
-function result = designLLC(Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, f_per, Pmax, Pmin, Ln)
+function result = designLLC(topology, Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, f_per, Pmax, Pmin, Ln)
 
-    %% Operating Frequencies
-    % FCML frequency doubling: transformer sees 2x switching frequency
-    f0 = 2 * fsw;                  % [Hz] Resonant frequency
+    if topology == "Multilevel Multitrack"
+        % Operating Frequency
+        % FCML frequency doubling: transformer sees 2x switching frequency
+        f0 = 2 * fsw;                  % [Hz] Resonant frequency
+
+        % Transformer Turns Ratio
+        % N is the turns ratio from primary to one secondary track
+        % Factor of 4 accounts for FCML voltage division
+        N_nom = Mg_nom * (Vin_nom / 4) / Vo_nom;
+        N = ceil(N_nom);               % Round up to nearest integer
+
+        % Gain Range
+        % Calculate required gain at voltage extremes
+        Vin_max = Vin_nom * (1 + percentReg);
+        Vin_min = Vin_nom * (1 - percentReg);
+    
+        Mg_min = N * Vo_nom / (Vin_max / 4);
+        Mg_max = N * Vo_nom / (Vin_min / 4);
+
+    elseif topology == "Multitrack"
+        % Operatin Frequency
+        f0 = fsw;
+        
+        % Transformer Turns Ratio
+        N_nom = Mg_nom * (Vin_nom / 2) / Vo_nom;
+        N = ceil(N_nom);               % Round up to nearest integer
+
+        % Gain Range
+        % Calculate required gain at voltage extremes
+        Vin_max = Vin_nom * (1 + percentReg);
+        Vin_min = Vin_nom * (1 - percentReg);
+    
+        Mg_min = N * Vo_nom / (Vin_max / 2);
+        Mg_max = N * Vo_nom / (Vin_min / 2);
+
+    else
+        error('Invalid topology specified. Please choose "Multilevel Multitrack" or "Multitrack".');
+    end
     
     % Normalized frequency range
     fn_min = 1 - f_per;            % Normalized minimum frequency
     fn_max = 1 + f_per;            % Normalized maximum frequency
-
-    %% Transformer Turns Ratio
-    % N is the turns ratio from primary to one secondary track
-    % Factor of 4 accounts for FCML voltage division
-    N_nom = Mg_nom * (Vin_nom / 4) / Vo_nom;
-    N = ceil(N_nom);               % Round up to nearest integer
-
-    %% Gain Range
-    % Calculate required gain at voltage extremes
-    Vin_max = Vin_nom * (1 + percentReg);
-    Vin_min = Vin_nom * (1 - percentReg);
-    
-    Mg_min = N * Vo_nom / (Vin_max / 4);
-    Mg_max = N * Vo_nom / (Vin_min / 4);
 
     %% Quality Factor
     % Find maximum Qe such that:
