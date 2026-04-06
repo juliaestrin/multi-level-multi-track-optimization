@@ -51,7 +51,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
 l_max = 100e-3;             % [m] max allowable transformer length [y-direction]
 
 centerpost_shape = 'round'; 
-stackup       = '3layer' ;   % Winding layer configuration
+stackup       = '5layer' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S

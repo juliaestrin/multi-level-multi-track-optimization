@@ -1,9 +1,15 @@
 function [x_opt, P_opt, results] = optimize_VIRT(w_max, l_max, params)
 % OPTIMIZE_VIRT_v2 Minimize P_total by optimizing a, b, w using fmincon
     
-    if params.topology == "Multitrack"
+    if params.topology == "Multitrack" 
         params.I = 2*params.I;
     end
+    if params.topology == "3-level Multitrack" 
+        params.I = 2*params.I;
+    end
+    % if params.topology == "Fullbridge LLC" 
+    %     params.I = 2*params.I;
+    % end
     
     % Bounds [m] - all positive
     lb = [1e-3, 1e-3, 2*params.s_ct];     % [a_min, b_min, w_min]

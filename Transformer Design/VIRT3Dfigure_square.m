@@ -1,8 +1,10 @@
 function VIRT3Dfigure_square(result, material, T_tx, idx)
     figure(1)
     % --- Select subplot based on idx ---
-    if idx == ~0
-        subplot(2, 1, idx);
+    if idx == 1
+        subplot(2, 1, 1);
+    elseif idx == 2
+        subplot(2, 1, 2);
     end 
     cla;  % Clear current axes instead of clf
     hold on;

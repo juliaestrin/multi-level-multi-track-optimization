@@ -2,9 +2,13 @@ function VIRT3Dfigure_round(result, material, T_tx, idx)
     figure(1)
     % --- Select subplot based on idx ---
     if idx == 1
-        subplot(2, 1, 1);
+        subplot(2, 2, 1);
     elseif idx == 2
-        subplot(2, 1, 2);
+        subplot(2, 2, 2);
+    elseif idx == 3
+        subplot(2, 2, 3);
+    elseif idx == 4
+        subplot(2, 2, 4);
     end 
     cla;  % Clear current axes instead of clf
     hold on;

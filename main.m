@@ -75,7 +75,7 @@ w_scale       = 1;          % [-]    Winding width scale factor
                             %        0.5 = rectangular (w = 0.5*l)
 l_max = 100e-3;             % [m] max allowable transformer length [y-direction]
 
-centerpost_shape = 'round'; % select 'round' or 'square'
+centerpost_shape = 'square'; % select 'round' or 'square'
 stackup       = '3layer' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
@@ -195,7 +195,8 @@ design_params = struct( ...
     );
 
 % --- Run Optimization ---
-[x_opt, P_opt, results] = optimize_VIRT(w_max, l_max, design_params);
+% [x_opt, P_opt, results] = optimize_VIRT(w_max, l_max, design_params);
+[x_opt, P_opt, results] = optimize_SPVIRT(w_max, l_max, design_params);
 
 
 % --- Approximate Transformer Temp Rise ---
@@ -217,11 +218,12 @@ T_tx = calculate_transformer_temp(results.P_total, results.Ac, results.h_w, R_pl
 
 % --- Generate 3D Visualization ---
 idx = 0; 
-if strcmp(centerpost_shape, 'round')
-    VIRT3Dfigure_round(results, material, T_tx, idx);
-else 
-    VIRT3Dfigure_square(results, material, T_tx, idx);
-end 
+SPVIRT3Dfigure_square(results, material, T_tx, idx)
+% if strcmp(centerpost_shape, 'round')
+%     VIRT3Dfigure_round(results, material, T_tx, idx);
+% else 
+%     VIRT3Dfigure_square(results, material, T_tx, idx);
+% end 
 % --- Parasitic Capacitance and Resonance Check (Optional) ---
 % Uncomment to calculate primary-to-secondary capacitance and verify
 % that Llk-Cps resonance does not interfere with LLC operation
