@@ -46,17 +46,17 @@ Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- Topology/Frequency Selection ---
-topology    = "Multitrack";
-fsw         = 1000e3;        % [Hz]   FCML switching frequency
-f0          = fsw;           % [Hz]   Transformer frequency
-SiCData     = 'SiC Data Multitrack.xlsx';
-GaNData     = [];
+% topology    = "Multitrack";
+% fsw         = 1000e3;        % [Hz]   FCML switching frequency
+% f0          = fsw;           % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data Multitrack.xlsx';
+% GaNData     = [];
 
 % topology    = "Multilevel Multitrack";
-% fsw         = 500e3;        % [Hz]   FCML switching frequency
-% f0          = 2*fsw;        % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data tf.xlsx';
-% GaNData     = 'GaN Data tf.xlsx';
+fsw         = 500e3;        % [Hz]   FCML switching frequency
+f0          = 2*fsw;        % [Hz]   Transformer frequency
+SiCData     = 'SiC Data tf.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
                             
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
@@ -73,7 +73,7 @@ w_max = 100e-3;             % [m] max transformer width [x-direction]
 l_max = 100e-3;             % [m] max allowable transformer length [y-direction]
 
 centerpost_shape = 'round'; % select 'round' or 'square'
-stackup       = '5layer' ;   % Winding layer configuration
+stackup       = '3layer' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S

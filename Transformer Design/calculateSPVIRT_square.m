@@ -1,12 +1,12 @@
-function result = calculateSPVIRT(a, b, w, params)
+function result = calculateSPVIRT_square(a, b, w, params)
     % Derived geometry
     w_winding = w - 2*params.s_ct;
     h_w = w/4 + params.h_pcb;
-    w_tot = 2*w + 2*b;
+    w_tot = 4*w + 3*b;
     l = a + 2*w_winding + 2*params.s_ct;
     h = h_w + b;
     Ac = a * b;
-    Vc = w_tot * a * h - 2 * a * w * h_w;
+    Vc = w_tot * a * h - 4 * a * w * h_w;
 
     % Initialize result struct with geometry (always included)
     result.a = a;
@@ -30,24 +30,24 @@ function result = calculateSPVIRT(a, b, w, params)
     end
 
     % Calculate electromagnetic quantities
-    result.lg = params.u0 * params.np^2 * Ac / (params.nt * params.Lu);
+    result.lg = params.u0 * params.np^2 * Ac / (8 * params.Lu);
     result.Bmax = 2*params.Vo / (4*params.f*Ac);
     result.P_core = Vc * params.k * params.f^(params.alpha) * result.Bmax^(params.beta);
     result.Pv = result.P_core / Vc * 1e-3; % [kW/m^3]
 
-    % Winding resistance
+    % Winding resistance for a single phase
     result.Rdc_pri = calculate_Rdc_rectangle(100, ...
             b + 2*params.s_ct, b + 2*params.s_ct + 2*w_winding, ...
-            b + 2*params.s_ct, l, ...
+            a + 2*params.s_ct, l, ...
             params.sigma_cu, params.t_cu_pri);
 
     result.Rdc_sec = calculate_Rdc_rectangle(100, ...
             b + 2*params.s_ct, b + 2*params.s_ct + 2*w_winding, ...
-            b + 2*params.s_ct, l, ...
+            a + 2*params.s_ct, l, ...
             params.sigma_cu, params.t_cu_sec);
 
     % Conduction losses
-    [result.P_pri, result.P_sec] = calculate_Pcond( ...
+    [result.P_pri, result.P_sec] = calculate_Pcond_SPVIRT( ...
         params.I, params.f, ...
         result.Rdc_pri, result.Rdc_sec, ...
         params.t_cu_pri, params.t_cu_sec, ...
