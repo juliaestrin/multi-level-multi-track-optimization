@@ -44,14 +44,14 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_h_max       = 20e-3;      % [m]    Maximum window height constraint
+w_max = 100e-3;             % [m] max transformer width [x-direction]
 w_scale       = 1;          % [-]    Winding width scale factor
                             %        1.0 = square winding (w = l)
                             %        0.5 = rectangular (w = 0.5*l)
-h_core_max  = 50e-3;       % [m]
+l_max = 100e-3;             % [m] max allowable transformer length [y-direction]
 
 centerpost_shape = 'round'; 
-stackup       = '5layer_interleaved' ;   % Winding layer configuration
+stackup       = '3layer' ;   % Winding layer configuration
 %   Supported stackup configurations:
 %     '3layer'             - 3-layer: P-S-P
 %     '5layer'             - 5-layer: P-P-P-P-S
@@ -63,43 +63,43 @@ stackup       = '5layer_interleaved' ;   % Winding layer configuration
 
 
 % --- Transformer Fixed Parameters ---
-w_b         = 4e-3;         % [m]
-t_cu_pri    = 2 * 35e-6;    % [m]
-t_cu_sec    = 2 * 35e-6;    % [m]
+t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
+t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
+s_ct = 0.5e-3;              % [m]    core to trace spacing
+h_pcb = 1.6e-3;             % [m]    pcb height
 
 
 % --- Heat Sink Parameters ---
-R_plate = 0.08; % [C/W]
-Area_plate = 152.4e-3 * 76.2e-3; % [m^2]
-T_water = 45;
+% PN: 180-10-6C - https://wakefieldthermal.com/content/data_sheets/Standard%20Liquid%20Cold%20Plates.pdf
+R_plate = 0.08; % [C/W] thermal resistance plate to inlet water
+Area_plate = 152.4e-3*76.2e-3; % [m^2] area of cold plate 
+T_water = 45; 
 
-% --- Thermal Grease ---
-sig_grease = 4;          % [W/(mK)]
-d_grease   = 0.127e-3;   % [m]
+% Thermal Grease 
+% BERGQUIST TGR 4000 (arbitrarily selected) 
+sig_grease = 4;  % [W/(mK)] thermal conductivity of grease 
+d_grease = 0.127e-3; % [m] reccomended thermal grease thickness 
 
 % --- Material Constants ---
 rho_cu      = 2.2e-8;        % [Ohm·m]
 sigma_cu    = 1 / rho_cu;    % [S/m]
 u0          = 4 * pi * 1e-7; % [H/m]
 
-T_tx_max = 150;
-
-fprintf('  Input voltage:      %.0f V\n', Vin_nom);
-fprintf('  Output voltage:     %.0f V (per track)\n', Vo_nom);
-fprintf('  Tracks (series):    %d\n', nt);
-fprintf('  Power (max):        %.2f kW\n', Pmax / 1e3);
-fprintf('  Power (min):        %.2f kW\n', Pmin / 1e3);
-fprintf('  LLC Mg_nom:         %.1f\n', Mg_nom);
-fprintf('  Line reg:           ±%.0f%%\n', percentReg * 100);
-fprintf('  Freq range:         ±%.0f%%\n', f_per * 100);
-fprintf('  Ln (Lm/Lr):         %.1f\n', Ln);
-fprintf('  Core material:      %s\n', material_name);
-fprintf('  Max window height:  %.1f mm\n', w_h_max * 1e3);
-fprintf('  Winding scale:      %.2f\n', w_scale);
-fprintf('  Stackup:            %s\n', stackup);
-fprintf('  Window breadth:     %.1f mm\n', w_b * 1e3);
-fprintf('  Copper (pri):       %.0f µm (%.1f oz)\n', t_cu_pri * 1e6, t_cu_pri / 35e-6);
-fprintf('  Copper (sec):       %.0f µm (%.1f oz)\n', t_cu_sec * 1e6, t_cu_sec / 35e-6);
+% fprintf('  Input voltage:    %.0f V\n', Vin_nom);
+% fprintf('  Output voltage:   %.0f V (per track)\n', Vo_nom);
+% fprintf('  Tracks (series):  %d\n', nt);
+% fprintf('  Power (max):      %.2f kW\n', Pmax / 1e3);
+% fprintf('  Power (min):      %.2f kW\n', Pmin / 1e3);
+% fprintf('  fsw (FCML):       %.0f kHz\n', fsw / 1e3);
+% fprintf('  f0 (transformer): %.1f MHz\n', f0 / 1e6);
+% fprintf('  LLC Mg_nom:       %.1f\n', Mg_nom);
+% fprintf('  Line reg:         ±%.0f%%\n', percentReg * 100);
+% fprintf('  Freq range:       ±%.0f%%\n', f_per * 100);
+% fprintf('  Ln (Lm/Lr):       %.1f\n', Ln);
+% fprintf('  Core material:    %s\n', material_name);
+% fprintf('  Stackup:          %s\n', stackup);
+% fprintf('  Copper (pri):     %.0f µm (%.1f oz)\n', t_cu_pri * 1e6, t_cu_pri / 35e-6);
+% fprintf('  Copper (sec):     %.0f µm (%.1f oz)\n', t_cu_sec * 1e6, t_cu_sec / 35e-6);
 
 %% ================= TOPOLOGY CONFIGURATION =================
 
@@ -129,6 +129,7 @@ k     = material.k;
 beta  = material.beta;
 alpha = material.alpha;
 uc    = material.uc;
+Bsat  = material.Bsat; 
 
 fprintf('Core Material: %s\n', material.name);
 fprintf('  k:                %.4e\n', k);
@@ -138,17 +139,6 @@ if isfield(material, 'alpha')
 end
 fprintf('  uc:               %d\n', uc);
 
-%% ================= OPTIMIZATION SWEEP =================
-
-Pv_max_list   = linspace(50e3, 1000e3, 1000 - 50 + 1);              % [W/m^3]
-w_height_list = linspace(5e-3, w_h_max, (w_h_max*1e3 - 5)*2 + 1);   % [m]
-
-fprintf('\nOptimization Sweep:\n');
-fprintf('  Pv_max range:     %.0f - %.0f kW/m³ (%d points)\n', ...
-    min(Pv_max_list)/1e3, max(Pv_max_list)/1e3, length(Pv_max_list));
-fprintf('  w_height range:   %.1f - %.1f mm (%d points)\n', ...
-    min(w_height_list)*1e3, max(w_height_list)*1e3, length(w_height_list));
-fprintf('  Total designs:    %d\n', length(Pv_max_list) * length(w_height_list));
 
 %% ================= RESULTS PREALLOCATION =================
 
@@ -175,7 +165,7 @@ for ii = 1:nTopo
     %% ---------- LLC RESONANT TANK DESIGN ----------
     fprintf('\n--- LLC RESONANT TANK DESIGN ---\n');
 
-    LLC_design = designLLC_v2(topology, Vin_nom, Vo_nom, Mg_nom, nt, ...
+    LLC_design = designLLC(topology, Vin_nom, Vo_nom, Mg_nom, nt, ...
         percentReg, fsw, f_per, Pmax, Pmin, Ln);
     
     
@@ -184,11 +174,12 @@ for ii = 1:nTopo
     Ir_rms = LLC_design.Ir_rms;
     Ir_pk  = Ir_rms * sqrt(2);
     N      = LLC_design.N;
-    Np     = N / nt;
+    np     = N / nt;
+    np_temp(ii) = np; 
 
 
     fprintf('  Turns ratio:      %d:1\n', N);
-    fprintf('  Np:1/2:           %d turns\n', Np);
+    fprintf('  Np:1/2:           %d turns\n', np);
     fprintf('  Lr (resonant):    %.4f µH\n', Llk * 1e6);
     fprintf('  Lm (magnetizing): %.4f µH\n', Lu * 1e6);
     fprintf('  Cr:               %.4f µF\n', LLC_design.Cr * 1e6);
@@ -199,57 +190,53 @@ for ii = 1:nTopo
     %% ---------- PACKAGE DESIGN PARAMETERS ----------
     % Bundle all transformer design parameters into a struct
     design_params = struct( ...
-        'topology',  topology,  ...  % topology
+        'topology',  topology,   ...
         'Vo',       Vo_nom,     ...  % Output voltage per track
         'nt',       nt,         ...  % Number of secondary tracks
         'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
         'I',        Ir_pk,      ...  % Peak primary current
         'f',        f0,         ...  % Operating frequency (transformer core)
-        'Np',       Np,         ...  % Primary turns per track
+        'np',       np,         ...  % Primary turns ratio per track
         'k',        k,          ...  % Steinmetz coefficient
         'beta',     beta,       ...  % Steinmetz exponent
         'alpha',    alpha,      ...  % Steinmetz alpha (for modified Steinmetz)
         'uc',       uc,         ...  % Core relative permeability
+        'Bsat',     Bsat,       ...  % Core max B field
         'rho_cu',   rho_cu,     ...  % Copper resistivity
         'sigma_cu', sigma_cu,   ...  % Copper conductivity
         'u0',       u0,         ...  % Permeability of free space
-        'w_b',      w_b,        ...  % Window breadth
-        'w_scale',  w_scale,    ...  % Winding width scale factor
         't_cu_pri', t_cu_pri,   ...  % Primary copper thickness
         't_cu_sec', t_cu_sec,   ...  % Secondary copper thickness
         'stackup',  stackup,     ...  % Winding layer configuration
-        'centerpost_shape',  centerpost_shape     ...  % Winding layer configuration
-    );
+        'centerpost_shape',  centerpost_shape,     ...  % Winding layer configuration
+        's_ct', s_ct, ...
+        'h_pcb', h_pcb ... 
+        );
     %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
-    fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
+    % --- Run Optimization ---
+    [x_opt, P_opt, TX_design] = optimize_VIRT(w_max, l_max, design_params);
 
-    opt = optimize_VIRT( ...
-        Pv_max_list, w_height_list, ...
-        h_core_max, T_tx_max, ...
-        R_plate, Area_plate, T_water, sig_grease, d_grease, ...
-        design_params);
 
-    T_tx = calculate_transformer_temp( ...
-        opt.opt_design.P_total, ...
-        opt.opt_design.Ac, ...
-        opt.opt_design.h_core/2, ...
-        R_plate, Area_plate, T_water, sig_grease, d_grease);
+    T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac, TX_design.h_w, R_plate, Area_plate, T_water, sig_grease, d_grease);
 
-    fprintf('\nOptimal Transformer Design:\n');
-    fprintf('  Pv_max_opt:       %.2f kW/m³\n', opt.Pv_max_opt / 1e3);
-    fprintf('  w_height_opt:     %.2f mm\n', opt.w_height_opt * 1e3);
-    fprintf('  Bmax_opt:         %.4f T\n', opt.Bmax_opt);
-    fprintf('  Core volume:      %.2f cm³\n', opt.opt_design.V_total * 1e6);
-    fprintf('  Footprint:        %.2f cm²\n', opt.opt_design.A_footprint * 1e4);
-    fprintf('  Air gap:          %.4f mm\n', opt.opt_design.lg * 1e3);
-    fprintf('  P_core:           %.2f W\n', opt.P_core_min);
-    fprintf('  P_copper:         %.2f W\n', opt.P_copper_min);
-    fprintf('  P_total:          %.2f W\n', opt.P_total_min);
-    fprintf('  T_transformer:    %.2f °C\n', T_tx);
+    % fprintf('\nOptimal Transformer Design:\n');
+    % fprintf('  Pv_max_opt:       %.2f kW/m³\n', opt.Pv_max_opt / 1e3);
+    % fprintf('  w_height_opt:     %.2f mm\n', opt.w_height_opt * 1e3);
+    % fprintf('  Bmax_opt:         %.4f T\n', opt.Bmax_opt);
+    % fprintf('  Core volume:      %.2f cm³\n', opt.opt_design.V_total * 1e6);
+    % fprintf('  Footprint:        %.2f cm²\n', opt.opt_design.A_footprint * 1e4);
+    % fprintf('  Air gap:          %.4f mm\n', opt.opt_design.lg * 1e3);
+    % fprintf('  P_core:           %.2f W\n', opt.P_core_min);
+    % fprintf('  P_copper:         %.2f W\n', opt.P_copper_min);
+    % fprintf('  P_total:          %.2f W\n', opt.P_total_min);
+    % fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
-    core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
-            sprintf('%s - %s', material.name, topology), T_tx,ii);
-    
+    idx = ii; 
+    if strcmp(centerpost_shape, 'round')
+        VIRT3Dfigure_round(TX_design, material, T_tx, ii);
+    else 
+        VIRT3Dfigure_square(TX_design, material, T_tx, ii);
+    end
     % try
     %     core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
     %         sprintf('%s - %s', material.name, topology), T_tx, ii);
@@ -292,7 +279,7 @@ for ii = 1:nTopo
     fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
 
     effOut = calcEfficiency_v3(out1, out2, "pareto", "pareto", ...
-        Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
+        Pmax, TX_design.P_total, TX_design.A_footprint * 1e6);
 
     %% ---------- EXTRACT BEST POINT ----------
     [bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
@@ -302,7 +289,7 @@ for ii = 1:nTopo
     results(ii).fsw         = fsw;
     results(ii).f0          = f0;
     results(ii).LLC         = LLC_design;
-    results(ii).opt         = opt;
+    results(ii).TX_design   = TX_design;
     results(ii).T_tx        = T_tx;
     results(ii).out1        = out1;
     results(ii).out2        = out2;
@@ -329,17 +316,17 @@ for ii = 1:nTopo
         r.LLC.Lm*1e6, ...
         r.LLC.Cr*1e6, ...
         r.LLC.Ir_rms, ...
-        r.opt.Pv_max_opt/1e3, ...
-        r.opt.w_height_opt*1e3, ...
-        r.opt.Bmax_opt, ...
-        r.opt.opt_design.V_total*1e6, ...
-        r.opt.opt_design.A_footprint*1e6, ...
-        r.opt.opt_design.A_footprint*1e4, ...
-        r.opt.opt_design.A_footprint*(39.3701^2), ...
-        r.opt.opt_design.lg*1e3, ...
-        r.opt.P_core_min, ...
-        r.opt.P_copper_min, ...
-        r.opt.P_total_min, ...
+        r.TX_design.Pv/1e3, ...
+        r.TX_design.Bmax, ...
+        r.TX_design.Vc*1e6, ...
+        r.TX_design.A_footprint*1e6, ...
+        r.TX_design.A_footprint*1e4, ...
+        r.TX_design.A_footprint*(39.3701^2), ...
+        r.TX_design.lg*1e3, ...
+        r.TX_design.P_core, ...
+        r.TX_design.P_pri, ...
+        r.TX_design.P_sec, ...
+        r.TX_design.P_total, ...
         r.T_tx, ...
         b.BestEfficiency_percent, ...
         b.BestSystemTotalLoss_W, ...
@@ -356,7 +343,6 @@ for ii = 1:nTopo
             'Cr_uF', ...
             'Ir_rms_A', ...
             'PvmaxOpt_kWm3', ...
-            'wHeightOpt_mm', ...
             'Bmax_T', ...
             'TransformerVolume_cm3', ...
             'TransformerFootprint_mm2', ...
@@ -364,7 +350,8 @@ for ii = 1:nTopo
             'TransformerFootprint_in2', ...
             'AirGap_mm', ...
             'TransformerCoreLoss_W', ...
-            'TransformerCopperLoss_W', ...
+            'TransformerPriCopperLoss_W', ...
+            'TransformerSecCopperLoss_W', ...
             'TransformerTotalLoss_W', ...
             'TransformerTemp_C', ...
             'BestSystemEfficiency_percent', ...
@@ -392,10 +379,10 @@ for ii = 1:nTopo
 
     oneRow = table( ...
         string(r.topology), ...
-        r.opt.opt_design.V_total * 1e6, ...
+        r.TX_design.Vc * 1e6, ...
         r.T_tx, ...
-        r.opt.P_core_min, ...
-        r.opt.P_copper_min, ...
+        r.TX_design.P_core, ...
+        r.TX_design.P_pri + r.TX_design.P_sec, ...
         'VariableNames', { ...
             'Topology', ...
             'TransformerVolume_cm3', ...

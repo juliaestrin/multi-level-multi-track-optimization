@@ -25,6 +25,7 @@ Pmin        = 0.1*Pmax; % [W]    Minimum output power (10% of rated)
 fsw         = 500e3;    % [Hz]   FCML switching frequency
 Ln          = 5;        % [-]    Inductance ratio Lm/Lr
 f_per       = 0.25;     % [-]    Frequency range ±25%
+topology    = "Multilevel Multitrack"; 
 
 fprintf('\nInput Specifications:\n');
 fprintf('  Vin_nom:      %.0f V\n', Vin_nom);
@@ -37,7 +38,7 @@ fprintf('  Reg:          ±%.0f%%\n', percentReg * 100);
 fprintf('  Freq range:   ±%.0f%%\n', f_per * 100);
 
 %% Run LLC Design
-result = designLLC(Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, f_per, Pmax, Pmin, Ln);
+result = designLLC(topology, Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, f_per, Pmax, Pmin, Ln);
 
 %% Display Results
 fprintf('\n========================================\n');
