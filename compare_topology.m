@@ -206,7 +206,7 @@ for ii = 1:nTopo
         'Lu',       Lu,         ...  % Magnetizing inductance (from LLC design)
         'I',        Ir_pk,      ...  % Peak primary current
         'f',        f0,         ...  % Operating frequency (transformer core)
-        'Np',       Np,         ...  % Primary turns per track
+        'np',       Np,         ...  % Primary turns per track
         'k',        k,          ...  % Steinmetz coefficient
         'beta',     beta,       ...  % Steinmetz exponent
         'alpha',    alpha,      ...  % Steinmetz alpha (for modified Steinmetz)
@@ -248,7 +248,7 @@ for ii = 1:nTopo
     fprintf('  P_total:          %.2f W\n', opt.P_total_min);
     fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
-    core3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
+    VIRT3Dfigure(opt.opt_design, opt.Pv_max_opt, opt.w_height_opt, ...
             sprintf('%s - %s', material.name, topology), T_tx,ii);
     
     % try
