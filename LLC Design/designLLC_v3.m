@@ -82,6 +82,22 @@ function result = designLLC_v3(topology, Vin_nom, Vo_nom, Mg_nom, nt, percentReg
     
         Mg_min = N * Vo_nom / (Vin_max / 2);
         Mg_max = N * Vo_nom / (Vin_min / 2);
+
+    elseif topology == "3-level Multitrack"
+        % Operatin Frequency
+        f0 = fsw;
+        
+        % Transformer Turns Ratio
+        N_nom = Mg_nom * (Vin_nom / 2) / Vo_nom;
+        N = ceil(N_nom);               % Round up to nearest integer
+
+        % Gain Range
+        % Calculate required gain at voltage extremes
+        Vin_max = Vin_nom * (1 + percentReg);
+        Vin_min = Vin_nom * (1 - percentReg);
+    
+        Mg_min = N * Vo_nom / (Vin_max / 2);
+        Mg_max = N * Vo_nom / (Vin_min / 2);
     
     elseif topology == "Fullbridge LLC"
         f0 = fsw;
