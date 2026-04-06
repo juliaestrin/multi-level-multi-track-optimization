@@ -1,6 +1,10 @@
-function [x_opt, P_opt, results] = optimize_VIRT_v2(w_max, l_max, params)
+function [x_opt, P_opt, results] = optimize_VIRT(w_max, l_max, params)
 % OPTIMIZE_VIRT_v2 Minimize P_total by optimizing a, b, w using fmincon
-
+    
+    if params.topology == "Multitrack"
+        params.I = 2*params.I;
+    end
+    
     % Bounds [m] - all positive
     lb = [1e-3, 1e-3, 2*params.s_ct];     % [a_min, b_min, w_min]
     ub = [2000e-3, 2000e-3, 2000e-3];        % [a_max, b_max, w_max]
@@ -28,9 +32,9 @@ end
 function P = get_Ptotal(x, params)
     
     if strcmp(params.centerpost_shape, 'round')
-        r = calculate_VIRT_circularPost_design_v2(x(2), x(3), params);
+        r = calculateVIRT_round(x(2), x(3), params);
     else 
-        r = calculate_VIRT_design_v2(x(1), x(2), x(3), params);
+        r = calculateVIRT_square(x(1), x(2), x(3), params);
     end 
     if r.is_valid
         P = r.P_total;
@@ -45,7 +49,11 @@ function [c, ceq] = constraints(x, w_max, l_max, params)
     w = x(3);
     s_ct = params.s_ct;
     
-    r = calculate_VIRT_design_v2(x(1), x(2), x(3), params);
+    if strcmp(params.centerpost_shape, 'round')
+        r = calculateVIRT_round(x(2), x(3), params);
+    else 
+        r = calculateVIRT_square(x(1), x(2), x(3), params);
+    end 
 
     % Inequality constraints: c <= 0
     w_tot = 2*w + 2*b;                  % Total width
