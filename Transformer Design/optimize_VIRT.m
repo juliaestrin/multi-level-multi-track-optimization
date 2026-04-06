@@ -27,6 +27,7 @@ function [x_opt, P_opt, results] = optimize_VIRT(w_max, l_max, params)
     else 
         results = calculateVIRT_square(x_opt(1), x_opt(2), x_opt(3), params);
     end 
+    results.topology = params.topology; 
 end
 
 function P = get_Ptotal(x, params)

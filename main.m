@@ -182,6 +182,7 @@ design_params = struct( ...
     'beta',     beta,       ...  % Steinmetz exponent
     'alpha',    alpha,      ...  % Steinmetz alpha (for modified Steinmetz)
     'uc',       uc,         ...  % Core relative permeability
+    'Bsat',     Bsat,       ...  % Core max B field
     'rho_cu',   rho_cu,     ...  % Copper resistivity
     'sigma_cu', sigma_cu,   ...  % Copper conductivity
     'u0',       u0,         ...  % Permeability of free space
@@ -202,17 +203,17 @@ T_tx = calculate_transformer_temp(results.P_total, results.Ac, results.h_w, R_pl
 
 
 % --- Display Optimal Design Results ---
-fprintf('\nOptimal Transformer Design:\n');
-fprintf('  Pv_max_opt:       %.2f kW/m³\n', opt.Pv_max_opt / 1e3);
-fprintf('  w_height_opt:     %.2f mm\n', opt.w_height_opt * 1e3);
-fprintf('  Bmax_opt:         %.4f T\n', opt.Bmax_opt);
-fprintf('  Core volume:      %.2f cm³\n', opt.opt_design.V_total * 1e6);
-fprintf('  Footprint:        %.2f cm²\n', opt.opt_design.A_footprint * 1e4);
-fprintf('  Air gap:          %.4f mm\n', opt.opt_design.lg * 1e3);
-fprintf('  P_core:           %.2f W\n', opt.P_core_min);
-fprintf('  P_copper:         %.2f W\n', opt.P_copper_min);
-fprintf('  P_total:          %.2f W\n', opt.P_total_min);
-fprintf('  T_transformer:    %.2f °C\n', T_tx);
+% fprintf('\nOptimal Transformer Design:\n');
+% fprintf('  Pv_max_opt:       %.2f kW/m³\n', opt.Pv_max_opt / 1e3);
+% fprintf('  w_height_opt:     %.2f mm\n', opt.w_height_opt * 1e3);
+% fprintf('  Bmax_opt:         %.4f T\n', opt.Bmax_opt);
+% fprintf('  Core volume:      %.2f cm³\n', opt.opt_design.V_total * 1e6);
+% fprintf('  Footprint:        %.2f cm²\n', opt.opt_design.A_footprint * 1e4);
+% fprintf('  Air gap:          %.4f mm\n', opt.opt_design.lg * 1e3);
+% fprintf('  P_core:           %.2f W\n', opt.P_core_min);
+% fprintf('  P_copper:         %.2f W\n', opt.P_copper_min);
+% fprintf('  P_total:          %.2f W\n', opt.P_total_min);
+% fprintf('  T_transformer:    %.2f °C\n', T_tx);
 
 % --- Generate 3D Visualization ---
 idx = 0; 
