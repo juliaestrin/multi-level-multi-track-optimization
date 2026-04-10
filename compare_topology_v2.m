@@ -249,7 +249,7 @@ for ii = 1:nTopo
     %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
     fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
 
-    out1 = analyzePriSwitches_v3(topology, Pmax, fsw, Ir_rms, 1, 8, ...
+    out1 = analyzePriSwitches_v3(topology, Pmax, fsw, Ir_rms, 1, 6, ...
         [], [], 10000, GaNData, SiCData);
 
     try
@@ -294,7 +294,7 @@ for ii = 1:nTopo
     % effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
     %     Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
     effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
-        Pmax, 0, 0);
+        Pmax, 56, 1500);
 
     %% ---------- EXTRACT BEST POINT ----------
     [bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);

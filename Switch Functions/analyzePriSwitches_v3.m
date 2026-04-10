@@ -230,6 +230,7 @@ for ii_global = 1:n_sw
         %fprintf("The thermal resistance of PCB is %d\n", Rth_board_min);
     end 
 
+    % Sweep
     for k = 1:nJ
         Rth_pw    = R_plate * Area_plate / (L_min * W_min);
         Rth_inter = 6*(0.6) / (L_min * W_min * 0.01);
