@@ -322,9 +322,8 @@ for ii_global = 1:n_sw
     end
 end
 
-%% STILL NEED TO FIX THE FOLLOWING PART!!!
-
 %% ===================== Colors =====================
+% 15 colors in total 
 baseColors = [
     0.1216    0.4667    0.7059
     1.0000    0.4980    0.0549

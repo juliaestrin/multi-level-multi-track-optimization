@@ -37,7 +37,7 @@ fprintf('  Reg:          ±%.0f%%\n', percentReg * 100);
 fprintf('  Freq range:   ±%.0f%%\n', f_per * 100);
 
 %% Run LLC Design
-result = designLLC_v3("3-level Multitrack",Vin_nom, Vo_nom, Mg_nom, nt, percentReg, 2*fsw, f_per, Pmax, Pmin, Ln);
+result = designLLC_v3("Multilevel Multitrack",Vin_nom, Vo_nom, Mg_nom, nt, percentReg, fsw, f_per, Pmax, Pmin, Ln);
 
 %% Display Results
 fprintf('\n========================================\n');
@@ -68,6 +68,6 @@ fprintf('  Re_min:          %.4f Ohm  (at Pmax)\n', result.Re_min);
 fprintf('  Re_max:          %.4f Ohm  (at Pmin)\n', result.Re_max);
 
 fprintf('\n-- RMS Current --\n');
-fprintf('  Ir_rms:          %.2f A  (primary, worst case)\n', result.Ir_rms);
+fprintf('  Ir_rms:          %.4f A  (primary, worst case)\n', result.Ir_rms);
 
 fprintf('\n========================================\n\n');
