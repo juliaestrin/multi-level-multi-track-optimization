@@ -141,7 +141,7 @@ for ii = 1:nTopo
     %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
     fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
 
-    out1 = analyzePriSwitches_v3(topology, Pmax, fsw, Ir_rms, 1, 8, ...
+    out1 = analyzePriSwitches_v4(topology, Pmax, fsw, Ir_rms, 1, 8, ...
         [], [], 10000, GaNData, SiCData);
 
     try

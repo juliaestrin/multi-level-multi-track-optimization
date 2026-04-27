@@ -208,7 +208,15 @@ for ii_global = 1:n_sw
     L_min   = T{ii, map.L_min};
     W_min   = T{ii, map.W_min};
     
-    Pin_Area = T{ii, map.Pin_Area};
+    if isfield(map, 'Pin_Area') && map.Pin_Area <= width(T)
+        Pin_Area = T{ii, map.Pin_Area};
+
+        if isempty(Pin_Area) || isnan(Pin_Area)
+            Pin_Area = 0;
+        end
+    else
+        Pin_Area = 0;
+    end
 
     Rth_jc   = T{ii, map.Rth_jc};
     R_ds_max = T{ii, map.Rds};
