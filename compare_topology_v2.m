@@ -491,7 +491,7 @@ for ii = 1:nTopo
         'DisplayName', results(ii).topology);
 end
 
-xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
+xlabel('Total Device Area [in$^2$]','Interpreter','latex','FontSize',15);
 ylabel('Total Loss [W]','Interpreter','latex','FontSize',15);
 title('Pareto Front Comparison: Total Loss vs Total Area');
 legend('Location','best');
@@ -519,7 +519,7 @@ for ii = 1:nTopo
         'DisplayName', results(ii).topology);
 end
 
-xlabel('Total Area [in$^2$]','Interpreter','latex','FontSize',15);
+xlabel('Total Device Area [in$^2$]','Interpreter','latex','FontSize',15);
 ylabel('Efficiency [\%]','Interpreter','latex','FontSize',15);
 title('Pareto Front Comparison: Efficiency vs Total Area');
 legend('Location','best');
