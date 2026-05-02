@@ -46,17 +46,17 @@ Pmax        = 6.25e3;       % [W]    Maximum output power
 Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- Topology/Frequency Selection ---
-topology    = "Multitrack";
-fsw         = 1000e3;        % [Hz]   FCML switching frequency
-f0          = fsw;           % [Hz]   Transformer frequency
-SiCData     = 'SiC Data Multitrack.xlsx';
-GaNData     = [];
-
-% topology    = "3-level Multitrack";
+% topology    = "Multitrack";
 % fsw         = 1000e3;        % [Hz]   FCML switching frequency
-% f0          = fsw;        % [Hz]   Transformer frequency
-% SiCData     = 'SiC Data tf.xlsx';
-% GaNData     = 'GaN Data tf.xlsx';
+% f0          = fsw;           % [Hz]   Transformer frequency
+% SiCData     = 'SiC Data Multitrack.xlsx';
+% GaNData     = [];
+
+topology    = "3-level Multitrack";
+fsw         = 1000e3;        % [Hz]   FCML switching frequency
+f0          = fsw;        % [Hz]   Transformer frequency
+SiCData     = 'SiC Data tf.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency
