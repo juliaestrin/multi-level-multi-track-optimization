@@ -52,7 +52,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 % SiCData     = 'SiC Data Multitrack.xlsx';
 % GaNData     = [];
 
-topology    = "3-level Multitrack";
+topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = 'SiC Data tf.xlsx';
