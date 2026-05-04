@@ -57,17 +57,21 @@ function [P_pri, P_sec] = calculate_Pcond_2LMT(I, f, Rdc_pri, Rdc_sec, t_cu_pri,
     G_sec = (sinh(delta_sec)   - sin(delta_sec))   / (cosh(delta_sec)   + cos(delta_sec));
 
     %% Current Squared (Precompute)
-    I2 = I^2;
 
     %% Calculate Losses Based on Stackup Configuration
+
+    % 8 Layer Pri, 2 Layer Sec
+    % S - P1 - P1 - P1 - P1 - P2 - P2 - P2 - P2 - S
+    P_pri = 2 * 1/2 * Rdc_pri * delta_pri * (4 * I^2 * F_pri + 2 * I^2 * G_pri * 20); 
+    P_sec = 2 * 1/2 * Rdc_sec * delta_sec * (4^2 * I^2 * F_sec); 
 
     % 8 Layer primary, 1 layer secondary 
     % P_pri = 1/2 * Rdc_pri * delta_pri * (8 * I2 * F_pri + 80 * I2 * G_pri);
     % P_sec = 1/2 * Rdc_sec * delta_sec * (64 * I2 * F_sec - 32 * I2 * G_sec); 
    
-    % 4 Layer primary, 1 layer secondary 
-    P_pri = 1/2 * Rdc_pri * delta_pri * (8 * I2 * F_pri + 32 * I2 * G_pri);
-    P_sec = 1/2 * Rdc_sec * delta_sec * (64 * I2 * F_sec - 32 * I2 * G_sec); 
-    
+    % % 4 Layer primary, 1 layer secondary 
+    % P_pri = 1/2 * Rdc_pri * delta_pri * (8 * I2 * F_pri + 32 * I2 * G_pri);
+    % P_sec = 1/2 * Rdc_sec * delta_sec * (64 * I2 * F_sec - 32 * I2 * G_sec); 
+    % 
 
 end
