@@ -1,0 +1,9 @@
+function Cps = calc_Cps(results)
+    Area = pi*(results.b/2+results.w_winding)^2 - pi*(results.b/2)^2;
+    d = 0.1960e-3; 
+    eps_0 = 8.854e-12; 
+    eps_r = 3; 
+    C0 = eps_0*eps_r*Area/d; 
+    Cps = C0/3; 
+
+end 
