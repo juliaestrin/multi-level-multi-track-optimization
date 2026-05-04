@@ -1,7 +1,8 @@
 function VIRT3Dfigure_round(result, material, T_tx, idx)
     figure(1)
     % --- Select subplot based on idx ---
-    if idx == 1
+    if idx == 0
+    elseif idx == 1
         subplot(2, 2, 1);
     elseif idx == 2
         subplot(2, 2, 2);

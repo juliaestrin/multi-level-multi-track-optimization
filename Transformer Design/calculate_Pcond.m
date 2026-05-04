@@ -71,7 +71,7 @@ function [P_pri, P_sec] = calculate_Pcond(I, f, Rdc_pri, Rdc_sec, t_cu_pri, t_cu
         
         case '5layer'
             % Configuration: P-P-P-P-S
-            P_pri = 0.5 * delta_pri * Rdc_pri * (4 * I2 * F_pri + 2 * (0 + 2 + 6 + 12) * G_pri);
+            P_pri = 0.5 * delta_pri * Rdc_pri * (4 * I2 * F_pri + 2 * (0 + 2 + 6 + 12) * I2* G_pri);
             
             % Secondary: center layer with strong proximity from 4 primary layers
             P_sec = 0.5 * delta_sec * Rdc_sec * I2 * (16*F_sec);
