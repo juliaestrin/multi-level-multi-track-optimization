@@ -5,8 +5,9 @@ a          = b;
 Ac         = pi * (b/2)^2;
 w_leg      = 1/2 * Ac / a;
 w_tot      = 2*w + b + 2*w_leg;
-w_winding  = w - 2*params.s_ct;
-h_w        = 2e-3 + params.h_pcb;
+w_winding  = w - 2*params.s_ct; 
+%h_w        = 2e-3 + params.h_pcb;
+h_w        = w/4 + params.h_pcb; % distance from gap pitch = pitch/4
 l          = a + 2*w_winding + 2*params.s_ct;
 h          = h_w + 2*w_leg;
 Vc         = w_tot * a * h - (2*w + b) * a * h_w + pi*(b/2)^2 * h_w;

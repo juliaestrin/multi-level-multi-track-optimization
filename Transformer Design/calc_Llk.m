@@ -1,10 +1,9 @@
-function Llk = calc_Llk(design_params, results)
+function Llk = calc_Llk(design_params, results, h_prepreg, h_core)
 t_pri    = design_params.t_cu_pri;
 t_sec    = design_params.t_cu_sec;
 t_shield = t_pri;
 
-% Thickness of pre-preg 2116 (RC58% at 70% Cu fill) [m]
-h_prepreg = 0.109e-3;
+
 h1  = h_prepreg;
 h3  = h_prepreg;
 h5  = h_prepreg;
@@ -12,8 +11,7 @@ h7  = h_prepreg;
 h9  = h_prepreg;
 h11 = h_prepreg;
 
-% Thickness of core [m]
-h_core = 0.130e-3;
+
 h2  = h_core;
 h4  = h_core;
 h6  = h_core;
