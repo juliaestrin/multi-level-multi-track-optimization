@@ -164,7 +164,7 @@ if topology == "Multilevel Multitrack"
 elseif topology == "Multitrack"
     pri_sw_count = 4;
     duty_cond = 0.5;
-elseif topology == "3-level Multitrack"
+elseif topology == "2-level Multitrack"
     pri_sw_count = 8;
     duty_cond = 0.5;
 elseif topology == "Fullbridge LLC"

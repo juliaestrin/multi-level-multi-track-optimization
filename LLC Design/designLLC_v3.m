@@ -83,7 +83,7 @@ function result = designLLC_v3(topology, Vin_nom, Vo_nom, Mg_nom, nt, percentReg
         Mg_min = N * Vo_nom / (Vin_max / 2);
         Mg_max = N * Vo_nom / (Vin_min / 2);
 
-    elseif topology == "3-level Multitrack"
+    elseif topology == "2-level Multitrack"
         % Operatin Frequency
         f0 = fsw;
         
