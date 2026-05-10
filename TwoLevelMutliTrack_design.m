@@ -76,7 +76,7 @@ u0          = 4 * pi * 1e-7; % [H/m]
 
 %% ================= TOPOLOGY CONFIGURATION =================
 
-topology = "3-level Multitrack";
+topology = "2-level Multitrack";
 fsw      = 1000e3;              % [Hz]
 f0       = fsw;                 % f0_factor = 1
 SiCData  = 'SiC Data tf.xlsx';
