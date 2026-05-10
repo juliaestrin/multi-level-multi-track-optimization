@@ -26,7 +26,7 @@ function VIRT3Dfigure_round(result, material, T_tx, idx)
     a          = result.a          * 1e3;
     b          = result.b          * 1e3;
     w          = result.w          * 1e3;
-    Ac         = result.Ac         * 1e6;
+  %  Ac         = result.Ac         * 1e6;
     s_ct       = result.s_ct       * 1e3;
     h_pcb      = result.h_pcb      * 1e3;
     lg         = result.lg         * 1e3;
@@ -38,7 +38,7 @@ function VIRT3Dfigure_round(result, material, T_tx, idx)
     centerpost_shape = result.centerpost_shape;
     gap_loc          = result.gap_loc;  % 'center' or 'all'
 
-    w_leg    = 1/2 * Ac / a;
+    w_leg    = result.w_leg * 1e3;
     x_center = w_tot / 2;
 
     % --- Gap sits just below the top yoke ---

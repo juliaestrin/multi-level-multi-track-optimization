@@ -166,7 +166,7 @@ fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
 [x_opt, P_opt, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
 
-T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac, TX_design.h_w, ...
+T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease);
 
 Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
