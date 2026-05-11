@@ -537,7 +537,14 @@ end
 %best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list, Meta);
 
 %% ===================== Outputs =====================
+ThermalTable = table( ...
+    Meta.Tech, Meta.Name, N_vias_vec, Rth_via_vec, Rth_fr4_vec, ...
+    Rth_board_vec, Rth_inter_vec, Rth_pw_vec, ...
+    'VariableNames', {'Tech','Name','N_vias','Rth_single_via','Rth_FR4', ...
+                      'Rth_board','Rth_interface','Rth_plate'});
+
 out = struct();
+out.ThermalTable  = ThermalTable;
 out.Power         = Power;
 out.f_sw_typ      = f_sw_typ;
 out.mode          = mode;
