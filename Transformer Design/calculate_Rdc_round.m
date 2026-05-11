@@ -39,16 +39,16 @@
 
 function Rdc = calculate_Rdc_round(n, r_0, r_n, sig_cu, t_cu)
 
-    % --- Input validation ---
-    if n < 0
-        error('n must be non-negative');
-    end
-    if r_n <= r_0
-        error('Outer radius r_n must be greater than inner radius r_0');
-    end
-    if r_0 <= 0
-        error('Inner radius r_0 must be positive');
-    end
+    % % --- Input validation ---
+    % if n < 0
+    %     error('n must be non-negative');
+    % end
+    % if r_n <= r_0
+    %     error('Outer radius r_n must be greater than inner radius r_0');
+    % end
+    % if r_0 <= 0
+    %     error('Inner radius r_0 must be positive');
+    % end
 
     % --- Geometry: conductor radial width per turn ---
     % dr represents the radial width of each conductor strip,
