@@ -55,7 +55,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
-SiCData     = 'SiC Data tf.xlsx';
+SiCData     = [];
 GaNData     = 'GaN Data tf.xlsx';
 
 % topology    = "Multilevel Multitrack";
@@ -66,7 +66,7 @@ GaNData     = 'GaN Data tf.xlsx';
                             
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
-percentReg  = 0.1;          % [-]    Line regulation tolerance (±10%)
+percentReg  = 0.05;          % [-]    Line regulation tolerance (±10%)
 f_per       = 0.25;         % [-]    Frequency range (±25%)
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
@@ -119,7 +119,7 @@ fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
-out1 = analyzePriSwitches_v4(topology, Pmax, fsw, Ir_rms, 1, 8, ...
+out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
     [], [], 10000, ...
     GaNData, SiCData);
 

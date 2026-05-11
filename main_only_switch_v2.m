@@ -176,7 +176,7 @@ end
 %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
 fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
 
-out1 = analyzePriSwitches_v4(topology, Pmax, fsw, Ir_rms, 1, 8, ...
+out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
     [], [], 10000, GaNData, SiCData);
 
 try
@@ -198,7 +198,7 @@ end
 %% ---------- SECONDARY SIDE SWITCH ANALYSIS ----------
 fprintf('\n--- SECONDARY SIDE SWITCH ANALYSIS ---\n');
 
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
 
 %% ---------- OVERALL EFFICIENCY / PARETO ----------
 fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
