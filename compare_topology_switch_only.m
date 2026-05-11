@@ -36,7 +36,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain
-percentReg  = 0.1;          % [-]    Line regulation tolerance
+percentReg  = 0.05;          % [-]    Line regulation tolerance
 f_per       = 0.25;         % [-]    Frequency range
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
