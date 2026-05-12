@@ -215,16 +215,16 @@ function effOut = calcEfficiency_v4(PriOut, SecOut, modePri, modeSec, Power, oth
     T = sortrows(T, {'Total Loss [W]','Area [mm2]'}, {'ascend','ascend'});
     effOut.table = T;
 
-    if showTable
-        disp(T);
-
-        if doPlot
-            fTbl = figure(figNum + 2); clf(fTbl);
-            fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
-            uitable(fTbl, 'Data', T{:,:}, 'ColumnName', T.Properties.VariableNames, ...
-                    'Units','normalized', 'Position',[0 0 1 1]);
-        end
-    end
+    % if showTable
+    %     disp(T);
+    % 
+    %     if doPlot
+    %         fTbl = figure(figNum + 2); clf(fTbl);
+    %         fTbl.Name = sprintf('Pareto Results Table (%s pareto)', paretoSide);
+    %         uitable(fTbl, 'Data', T{:,:}, 'ColumnName', T.Properties.VariableNames, ...
+    %                 'Units','normalized', 'Position',[0 0 1 1]);
+    %     end
+    % end
 
     % ---------------- Overall Pareto front data for pareto/pareto case ----------------
     if isParetoPri && isParetoSec && numel(SecOut.best.pareto) > 1

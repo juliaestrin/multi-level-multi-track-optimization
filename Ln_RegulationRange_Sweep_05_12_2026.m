@@ -1,0 +1,326 @@
+% Parameter Sweep: Ln and percentReg for Lowest Loss Designs
+% Sweeps Ln (1–20) and percentReg (0.05–0.1) and compares power loss and area
+
+clear; close all; clc;
+
+%% ========================= SETUP =========================
+addpath('Switch Functions');
+addpath('Transformer Design');
+addpath('LLC Design');
+addpath('Lr Design')
+
+%% ================= FIXED DESIGN SPECIFICATIONS =================
+
+%fprintf('\n--- Shared Design Specifications ---\n');
+
+% --- Electrical Specifications ---
+Vin_nom     = 1500;
+Vo_nom      = 48;
+nt          = 2;
+Pmax        = 6.25e3;
+Pmin        = 0.1 * Pmax;
+
+% --- LLC Resonant Tank Specifications ---
+Mg_nom      = 1.0;
+f_per       = 0.25;
+
+% --- Transformer Design Specifications ---
+material_name = 'F80';
+w_max_TX = 70e-3;
+l_max_TX = 70e-3;
+gap_loc = 'all';
+TX_shape = 'round';
+
+w_max_Lr = 40e-3;
+l_max_Lr = 40e-3;
+
+Lr_shape = 'rectangle'; 
+Tmax = 105;
+
+h_prepreg = 0.227e-3;
+h_core    = 0.280e-3;
+
+% --- Transformer Fixed Parameters ---
+t_cu_pri  = 2 * 35e-6;
+t_cu_sec  = 2 * 35e-6;
+s_ct      = 0.5e-3;
+h_pcb     = 3.6e-3;
+
+% --- Heat Sink Parameters ---
+R_plate    = 0.08;
+Area_plate = 152.4e-3 * 76.2e-3;
+T_water    = 45;
+
+% --- Thermal Grease ---
+sig_grease = 4;
+d_grease   = 0.127e-3;
+
+% --- Material Constants ---
+rho_cu   = 2.2e-8;
+sigma_cu = 1 / rho_cu;
+u0       = 4 * pi * 1e-7;
+
+% --- Topology ---
+topology = "2-level Multitrack";
+fsw      = 1000e3;
+f0       = fsw;
+
+% --- Switch Data ---
+SiCData = '';
+GaNData = 'GaN_05_12_26.xlsx';
+
+%% ================= SWEEP PARAMETERS =================
+
+Ln_vec         = 1:0.5:20;              % Inductance ratio sweep
+%percentReg_vec = [0.05, 0.10]; % Line regulation tolerance sweep
+% Modify the linspace resolution as needed:
+percentReg_vec = linspace(0.05, 0.10, 6);
+
+nLn  = length(Ln_vec);
+nReg = length(percentReg_vec);
+
+% --- Pre-allocate results ---
+Loss_mat = NaN(nReg, nLn);   % [W]   Total loss
+Area_mat = NaN(nReg, nLn);   % [mm²] Total footprint area
+
+%% ================= CORE MATERIAL (load once) =================
+
+material = get_core_material(material_name);
+k     = material.k;
+beta  = material.beta;
+alpha = material.alpha;
+uc    = material.uc;
+Bsat  = material.Bsat;
+
+%% ================= SWEEP LOOP =================
+
+total_iter = nLn * nReg;
+iter = 0;
+
+fprintf('\nStarting sweep: %d Ln values × %d percentReg values = %d designs\n\n', ...
+    nLn, nReg, total_iter);
+
+for iReg = 1:nReg
+    for iLn = 1:nLn
+
+        iter = iter + 1;
+        Ln         = Ln_vec(iLn);
+        percentReg = percentReg_vec(iReg);
+        % 
+        % fprintf('[%3d/%3d]  Ln = %2d,  percentReg = %.3f ... ', ...
+        %     iter, total_iter, Ln, percentReg);
+
+        try
+            %% --- LLC Resonant Tank Design ---
+            LLC_design = designLLC_v3(topology, Vin_nom, Vo_nom, Mg_nom, nt, ...
+                percentReg, fsw, f_per, Pmax, Pmin, Ln);
+
+            Lu     = LLC_design.Lm;
+            Llk    = LLC_design.Lr;
+            Ir_rms = LLC_design.Ir_rms;
+            Ir_pk  = Ir_rms * sqrt(2);
+            N      = LLC_design.N;
+            np     = N / nt;
+
+            %% --- Design Parameter Struct ---
+            design_params = struct( ...
+                'topology',  topology,   ...
+                'Vo',        Vo_nom,     ...
+                'nt',        nt,         ...
+                'Lu',        Lu,         ...
+                'Lr',        Llk,        ...
+                'I',         Ir_pk,      ...
+                'f',         f0,         ...
+                'np',        np,         ...
+                'k',         k,          ...
+                'beta',      beta,       ...
+                'alpha',     alpha,      ...
+                'uc',        uc,         ...
+                'Bsat',      Bsat,       ...
+                'rho_cu',    rho_cu,     ...
+                'sigma_cu',  sigma_cu,   ...
+                'u0',        u0,         ...
+                't_cu_pri',  t_cu_pri,   ...
+                't_cu_sec',  t_cu_sec,   ...
+                'stackup',   'Temp',    ...
+                'centerpost_shape', TX_shape, ...
+                's_ct',      s_ct,       ...
+                'h_pcb',     h_pcb,      ...
+                'T_max',     Tmax,       ...
+                'R_plate',   R_plate,    ...
+                'Area_plate',Area_plate, ...
+                'T_water',   T_water,    ...
+                'sig_grease',sig_grease, ...
+                'd_grease',  d_grease,   ...
+                'gap_loc',   gap_loc,    ...
+                'shape',     Lr_shape ...
+            );
+            design_params.N_min = 1;
+            design_params.N_max = 20;
+
+            %% --- Transformer Optimization ---
+            [~, ~, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
+
+            %% --- Lr Design ---
+            [~, ~, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
+
+            %% --- Switch Analysis ---
+            out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
+                [], [], 10000, GaNData, SiCData);
+
+            out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
+
+            %% --- Efficiency / Pareto ---
+            passive_loss  = TX_design.P_total + Lr_design.P_total;
+            passive_area  = (TX_design.A_footprint + Lr_design.A_footprint) * 1e6; % mm²
+
+            effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+                Pmax, passive_loss, passive_area, [], [], false, false);
+
+            Loss_mat(iReg, iLn) = effOut.points(1).loss_W;
+            Area_mat(iReg, iLn) = effOut.points(1).area_mm2;
+
+            % fprintf('Loss = %6.2f W,  Area = %7.2f mm²\n', ...
+            %     Loss_mat(iReg, iLn), Area_mat(iReg, iLn));
+
+        catch ME
+            % fprintf('FAILED: %s\n', ME.message);
+        end
+
+    end % Ln loop
+end % percentReg loop
+
+% fprintf('\nSweep complete.\n');
+
+%% ================= SAVE RESULTS =================
+
+% save('sweep_results.mat', 'Ln_vec', 'percentReg_vec', 'Loss_mat', 'Area_mat');
+% fprintf('Results saved to sweep_results.mat\n');
+
+%% ================= PLOTTING =================
+
+Area_mat_in = Area_mat * 0.00155; % convert from mm^2 to inches $=^2
+reg_labels = arrayfun(@(r) sprintf('reg = %.1f%%', r*100), percentReg_vec, ...
+    'UniformOutput', false);
+
+color_order = lines(nReg);
+
+%% --- Plot 1: Power Loss vs Ln ---
+figure('Name', 'Power Loss vs Ln', 'NumberTitle', 'off');
+hold on; grid on; box on;
+for iReg = 1:nReg
+    plot(Ln_vec, Loss_mat(iReg, :), '-o', ...
+        'Color', color_order(iReg,:), ...
+        'LineWidth', 2, 'MarkerSize', 6, ...
+        'DisplayName', reg_labels{iReg});
+end
+xlabel('L_n  (L_m / L_r)', 'FontSize', 12);
+ylabel('Total Power Loss  [W]', 'FontSize', 12);
+title('Power Loss vs Inductance Ratio L_n', 'FontSize', 13);
+legend('Location', 'best');
+set(gca, 'FontSize', 11);
+
+%% --- Plot 1: Efficiency vs Ln ---
+figure('Name', 'Efficiency vs Ln', 'NumberTitle', 'off');
+hold on; grid on; box on;
+for iReg = 1:nReg
+    plot(Ln_vec, 100*(Pmax - Loss_mat(iReg, :))/Pmax, '-o', ...
+        'Color', color_order(iReg,:), ...
+        'LineWidth', 2, 'MarkerSize', 6, ...
+        'DisplayName', reg_labels{iReg});
+end
+xlabel('L_n  (L_m / L_r)', 'FontSize', 12);
+ylabel('Efficiency[%]', 'FontSize', 12);
+title('Efficiency vs Inductance Ratio L_n', 'FontSize', 13);
+legend('Location', 'best');
+set(gca, 'FontSize', 11);
+
+%% --- Plot 2: Footprint Area vs Ln ---
+figure('Name', 'Area vs Ln', 'NumberTitle', 'off');
+hold on; grid on; box on;
+for iReg = 1:nReg
+    plot(Ln_vec, Area_mat_in(iReg, :), '-s', ...
+        'Color', color_order(iReg,:), ...
+        'LineWidth', 2, 'MarkerSize', 6, ...
+        'DisplayName', reg_labels{iReg});
+end
+xlabel('L_n  (L_m / L_r)', 'FontSize', 12);
+ylabel('Total Footprint Area  [in²]', 'FontSize', 12);
+title('Footprint Area vs Inductance Ratio L_n', 'FontSize', 13);
+legend('Location', 'best');
+set(gca, 'FontSize', 11);
+
+%% --- Plot 3: Loss–Area Pareto (all designs) ---
+figure('Name', 'Loss-Area Pareto', 'NumberTitle', 'off');
+hold on; grid on; box on;
+
+for iReg = 1:nReg
+
+    % --- Scatter points ---
+    valid = ~isnan(Area_mat_in(iReg,:)) & ~isnan(Loss_mat(iReg,:));
+    scatter(Area_mat_in(iReg, valid), Loss_mat(iReg, valid), 80, ...
+        'MarkerEdgeColor', color_order(iReg,:), ...
+        'MarkerFaceColor', color_order(iReg,:), ...
+        'MarkerFaceAlpha', 0.7, ...
+        'DisplayName', reg_labels{iReg});
+
+    % --- Annotate every valid point with its Ln value ---
+    for iLn = 1:nLn
+        if valid(iLn)
+            text(Area_mat_in(iReg, iLn), Loss_mat(iReg, iLn), ...
+                sprintf('  L_n=%g', (Ln_vec(iLn))), ...
+                'FontSize', 8, 'Color', color_order(iReg,:) * 0.8, ...
+                'VerticalAlignment', 'middle');
+        end
+    end
+end
+
+xlabel('Total Footprint Area  [in²]', 'FontSize', 12);
+ylabel('Total Power Loss  [W]', 'FontSize', 12);
+title('Loss–Area Trade-off', 'FontSize', 13);
+legend('Location', 'best');
+set(gca, 'FontSize', 11);
+
+%% --- Plot 5: Efficiency–Area Pareto (all designs) ---
+figure('Name', 'Efficiency-Area Pareto', 'NumberTitle', 'off');
+hold on; grid on; box on;
+
+for iReg = 1:nReg
+
+    % --- Scatter points ---
+    valid = ~isnan(Area_mat_in(iReg,:)) & ~isnan(Loss_mat(iReg,:));
+    scatter(Area_mat_in(iReg, valid), (Pmax - Loss_mat(iReg, valid))/Pmax * 100, 80, ...
+        'MarkerEdgeColor', color_order(iReg,:), ...
+        'MarkerFaceColor', color_order(iReg,:), ...
+        'MarkerFaceAlpha', 0.7, ...
+        'DisplayName', reg_labels{iReg});
+
+    % --- Annotate every valid point with its Ln value ---
+    for iLn = 1:nLn
+        if valid(iLn)
+            text(Area_mat_in(iReg, iLn), (Pmax-Loss_mat(iReg, iLn))/Pmax * 100, ...
+                sprintf('  L_n=%g', (Ln_vec(iLn))), ...
+                'FontSize', 8, 'Color', color_order(iReg,:) * 0.8, ...
+                'VerticalAlignment', 'middle');
+        end
+    end
+end
+
+xlabel('Total Footprint Area  [in²]', 'FontSize', 12);
+ylabel('Efficiency [%]', 'FontSize', 12);
+title('Efficiency–Area Trade-off', 'FontSize', 13);
+legend('Location', 'best');
+set(gca, 'FontSize', 11);
+
+%% ================= SUMMARY TABLE =================
+
+fprintf('\n%-10s  %-12s  %-12s  %-12s\n', ...
+    'percentReg', 'Best Ln (Loss)', 'Min Loss [W]', 'Best Ln (Area)');
+fprintf('%s\n', repmat('-', 1, 55));
+
+for iReg = 1:nReg
+    [minLoss, idxL] = min(Loss_mat(iReg, :));
+    [~,       idxA] = min(Area_mat_in(iReg, :));
+    fprintf('%-10.3f  %-14d  %-14.2f  %-d\n', ...
+        percentReg_vec(iReg), Ln_vec(idxL), minLoss, Ln_vec(idxA));
+end

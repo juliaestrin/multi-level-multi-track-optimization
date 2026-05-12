@@ -15,7 +15,7 @@ function out = analyzeSecSwitches_v2(Power, f_per, f_sw_typ, mode, max_para, sel
 
 %% ===================== Defaults =====================
 if nargin < 8 || isempty(dataFile)
-    dataFile = 'Sec Data.xlsx';
+    dataFile = 'Sec_05_12_2026.xlsx';
 end
 if nargin < 7 || isempty(compare_list)
     compare_list = [];
@@ -166,54 +166,54 @@ marker_by_jj{8}  = 'h';
 marker_by_jj{9}  = '<';
 marker_by_jj{10} = 'x';
 
-%% ============================================================
-% FIGURE 1: All devices
-%% ============================================================
-figure(4); clf;
-tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
-
-nexttile; hold on; grid on;
-for i = 1:n_sw
-    plot(jj_set, P_total_plot(i,:), '-o', ...
-        'Color', colors(i,:), ...
-        'MarkerFaceColor', colors(i,:), ...
-        'LineWidth', 1.5, 'MarkerSize', 6);
-end
-xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
-
-nexttile; hold on; grid on;
-for i = 1:n_sw
-    plot(jj_set, T_j_plot(i,:), '-o', ...
-        'Color', colors(i,:), ...
-        'MarkerFaceColor', colors(i,:), ...
-        'LineWidth', 1.5, 'MarkerSize', 6);
-end
-xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
-legend(SecData.Name,'Location','best','FontSize',10);
-
-sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
-    'Interpreter','latex','FontSize',15);
-
-%% ============================================================
-% FIGURE 2: Top-N selection (Loss vs jj + Area vs Loss)
-%% ============================================================
-
-% ---- Top-N selection ----
-rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
-rank.N_keep  = 20;        % number of devices to keep
-rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
-
-% Apply mode rule to jj_list (overlap behavior)
-rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
-
-% Build selection (top-N by loss at jj_rank)
-C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
-
-plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
-    sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 5);
-
+% %% ============================================================
+% % FIGURE 1: All devices
+% %% ============================================================
+% figure(4); clf;
+% tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
+% 
+% nexttile; hold on; grid on;
+% for i = 1:n_sw
+%     plot(jj_set, P_total_plot(i,:), '-o', ...
+%         'Color', colors(i,:), ...
+%         'MarkerFaceColor', colors(i,:), ...
+%         'LineWidth', 1.5, 'MarkerSize', 6);
+% end
+% xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+% ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+% 
+% nexttile; hold on; grid on;
+% for i = 1:n_sw
+%     plot(jj_set, T_j_plot(i,:), '-o', ...
+%         'Color', colors(i,:), ...
+%         'MarkerFaceColor', colors(i,:), ...
+%         'LineWidth', 1.5, 'MarkerSize', 6);
+% end
+% xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+% ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
+% legend(SecData.Name,'Location','best','FontSize',10);
+% 
+% sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
+%     'Interpreter','latex','FontSize',15);
+% 
+% %% ============================================================
+% % FIGURE 2: Top-N selection (Loss vs jj + Area vs Loss)
+% %% ============================================================
+% 
+% % ---- Top-N selection ----
+% rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
+% rank.N_keep  = 20;        % number of devices to keep
+% rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
+% 
+% % Apply mode rule to jj_list (overlap behavior)
+% rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
+% 
+% % Build selection (top-N by loss at jj_rank)
+% C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
+% 
+% plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
+%     sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 5);
+% 
 %% ============================================================
 % Best Devices (min loss, min area, min loss*area, and Pareto)
 %% ============================================================
@@ -255,7 +255,7 @@ out.P_total_plot  = P_total_plot;
 out.T_j_plot      = T_j_plot;
 out.T_per         = T_per;
 
-out.rank          = rank;
+%out.rank          = rank;
 
 out.compare_list_used = compare_list;
 out.best = best;
