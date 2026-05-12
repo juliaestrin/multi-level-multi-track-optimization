@@ -32,34 +32,40 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain
-percentReg  = 0.1;         % [-]    Line regulation tolerance
+percentReg  = 0.05;         % [-]    Line regulation tolerance
 f_per       = 0.25;         % [-]    Frequency range
-Ln          = 5;            % [-]    Inductance ratio Lm/Lr
+Ln          = 7;            % [-]    Inductance ratio Lm/Lr
 
 % --- Transformer Design Specifications ---
 material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_max = 40e-3;             % [m] max transformer width [x-direction]
-l_max = 40e-3;             % [m] max allowable transformer length [y-direction]
+w_max_TX = 50e-3;             % [m] max transformer width [x-direction]
+l_max_TX = 50e-3;             % [m] max allowable transformer length [y-direction]
 gap_loc = 'all';           % gap location: 'center' or 'all' legs
 
-centerpost_shape = 'round';
+w_max_Lr = 25e-3; 
+l_max_Lr = 25e-3; 
+
+TX_shape = 'round';
+Lr_shape = 'rectangle'; 
 stackup = '5Layer';
-Tmax = 105; 
+Tmax = 100; 
 
 % Prepreg/Core options: https://cdn.files-text.com/us-south1/api/lc/att/12933531/5ecb2f5812e859e88eaf9a75818cfc28/CN-LU-2209-S05-S1000-2M-S1000-2MB-DK.pdf
 % Thickness of pre-preg  (Glass Type: 7628, RC Nominal: 52) [m]
-h_prepreg = 0.227e-3; 
+h_prepreg = 0.1e-3; 
 % Thickness of core (ply-up: 2116+1080+2116)
-h_core = 0.280e-3;
+h_core = 0.1e-3;
 
 % --- Transformer Fixed Parameters ---
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
 s_ct = 0.5e-3;              % [m]    core to trace spacing
-h_pcb = 3.6e-3;             % [m]    pcb height
+
+
+h_pcb = 6*h_prepreg + 5*h_core + 12 * t_cu_pri;             % [m]    pcb height
 
 % --- Heat Sink Parameters ---
 R_plate    = 0.08;                          % [C/W]
@@ -151,7 +157,7 @@ design_params = struct( ...
     't_cu_pri', t_cu_pri,   ...
     't_cu_sec', t_cu_sec,   ...
     'stackup',  stackup,    ...
-    'centerpost_shape', centerpost_shape, ...
+    'centerpost_shape', TX_shape, ...
     's_ct',     s_ct,       ...
     'h_pcb',    h_pcb,       ...
     'T_max',    Tmax,        ... 
@@ -161,14 +167,15 @@ design_params = struct( ...
     'sig_grease', sig_grease, ...
     'd_grease', d_grease, ...
     'gap_loc', gap_loc, ...
-    'shape', 'rectangle' ...
+    'shape', Lr_shape ...
     );
+
 design_params.N_min = 1;
-design_params.N_max = 20;
+design_params.N_max = 12;
 %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
 fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
-[x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
+[x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
 
 T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease);
@@ -177,208 +184,159 @@ T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_des
 % Cps    = calc_Cps(TX_design);
 % f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
 
-if strcmp(centerpost_shape, 'round')
+if strcmp(TX_shape, 'round')
     VIRT3Dfigure_round(TX_design, material, T_tx, 0);
 else
     VIRT3Dfigure_square(TX_design, material, T_tx, 0);
 end
 
 %% Lr Design 
-w_max = 30e-3; 
-l_max = 40e-3; 
-[x_opt_Lr, P_opt_Lr, results] = optimize_Lr(w_max, l_max, design_params)
 
-Lr_3DFigure(results)
-% %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
-% fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
-% 
-% out1 = analyzePriSwitches_v3(topology, Pmax, fsw, Ir_rms, 1, 8, ...
-%     [], [], 10000, GaNData, SiCData);
-% 
-% try
-%     pareto   = out1.best.pareto;
-%     T_pareto = struct2table(pareto);
-% 
-%     wantedVars = {'device_name','jj','P_cond_W','P_off_W','P_gate_W','loss_W','area_mm2'};
-%     if all(ismember(wantedVars, T_pareto.Properties.VariableNames))
-%         T_pareto = T_pareto(:, wantedVars);
-%         T_pareto.Properties.VariableNames = { ...
-%             'DeviceName', 'ParallelCount', 'P_cond', 'P_off', ...
-%             'P_gate', 'TotalLoss', 'TotalArea_mm2'};
-%     end
-%     disp(T_pareto);
-% catch
-%     warning('Could not display primary pareto table.');
-% end
-% 
-% %% ---------- SECONDARY SIDE SWITCH ANALYSIS ----------
-% fprintf('\n--- SECONDARY SIDE SWITCH ANALYSIS ---\n');
-% 
-% out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
-% 
-% %% ---------- OVERALL EFFICIENCY / PARETO ----------
-% fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
-% 
-% effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
-%     Pmax, TX_design.P_total, TX_design.A_footprint * 1e6);
-% 
-% [bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
-% 
-% %% ---------- RESULTS SUMMARY ----------
-% 
-% fprintf('\n====================================================\n');
-% fprintf('RESULTS SUMMARY\n');
-% fprintf('====================================================\n');
-% 
-% comparisonTable = table( ...
-%     string(topology), ...
-%     fsw/1e3, ...
-%     f0/1e3, ...
-%     LLC_design.N, ...
-%     LLC_design.Lr*1e6, ...
-%     LLC_design.Lm*1e6, ...
-%     LLC_design.Cr*1e6, ...
-%     LLC_design.Ir_rms, ...
-%     TX_design.Pv/1e3, ...
-%     TX_design.Bmax, ...
-%     TX_design.Vc*1e6, ...
-%     TX_design.A_footprint*1e6, ...
-%     TX_design.A_footprint*1e4, ...
-%     TX_design.A_footprint*(39.3701^2), ...
-%     TX_design.lg*1e3, ...
-%     TX_design.P_core, ...
-%     TX_design.P_pri, ...
-%     TX_design.P_sec, ...
-%     TX_design.P_total, ...
-%     T_tx, ...
-%     bestSummary.BestEfficiency_percent, ...
-%     bestSummary.BestSystemTotalLoss_W, ...
-%     bestSummary.BestSystemTotalArea_mm2, ...
-%     bestSummary.BestSystemTotalArea_in2, ...
-%     bestSummary.NumParetoPoints, ...
-%     'VariableNames', { ...
-%         'Topology', ...
-%         'fsw_kHz', ...
-%         'f0_kHz', ...
-%         'TurnsRatio_N', ...
-%         'Lr_uH', ...
-%         'Lm_uH', ...
-%         'Cr_uF', ...
-%         'Ir_rms_A', ...
-%         'PvmaxOpt_kWm3', ...
-%         'Bmax_T', ...
-%         'TransformerVolume_cm3', ...
-%         'TransformerFootprint_mm2', ...
-%         'TransformerFootprint_cm2', ...
-%         'TransformerFootprint_in2', ...
-%         'AirGap_mm', ...
-%         'TransformerCoreLoss_W', ...
-%         'TransformerPriCopperLoss_W', ...
-%         'TransformerSecCopperLoss_W', ...
-%         'TransformerTotalLoss_W', ...
-%         'TransformerTemp_C', ...
-%         'BestSystemEfficiency_percent', ...
-%         'BestSystemTotalLoss_W', ...
-%         'BestSystemTotalArea_mm2', ...
-%         'BestSystemTotalArea_in2', ...
-%         'NumParetoPoints' ...
-%     });
-% 
-% disp(comparisonTable);
-% 
-% fprintf('\n--- Transformer Summary ---\n');
-% fprintf('  Volume:      %.4f cm^3\n', TX_design.Vc * 1e6);
-% fprintf('  Temperature: %.2f C\n',    T_tx);
-% fprintf('  Core loss:   %.2f W\n',    TX_design.P_core);
-% fprintf('  Copper loss: %.2f W\n',    TX_design.P_pri + TX_design.P_sec);
-% 
-% fprintf('\n--- Augmented Pareto Table ---\n');
-% disp(effTableAug);
-% 
-% %% ================= PLOT: PARETO FRONT =================
-% 
-% figure('Name', 'Pareto Front: Area vs Loss');
-% hold on; grid on; box on;
-% plot(effTableAug.PlotArea_in2, effTableAug.PlotLoss_W, ...
-%     'LineStyle', '-', 'LineWidth', 1.8, 'Color', [0 0.4470 0.7410], ...
-%     'Marker', 'o', 'MarkerSize', 7, 'DisplayName', topology);
-% xlabel('Total Area [in$^2$]', 'Interpreter', 'latex', 'FontSize', 15);
-% ylabel('Total Loss [W]',      'Interpreter', 'latex', 'FontSize', 15);
-% title('Pareto Front: Total Loss vs Total Area');
-% legend('Location', 'best');
-% set(gca, 'FontSize', 12);
-% 
-% figure('Name', 'Pareto Front: Area vs Efficiency');
-% hold on; grid on; box on;
-% plot(effTableAug.PlotArea_in2, effTableAug.PlotEfficiency_percent, ...
-%     'LineStyle', '-', 'LineWidth', 1.8, 'Color', [0 0.4470 0.7410], ...
-%     'Marker', 'o', 'MarkerSize', 7, 'DisplayName', topology);
-% xlabel('Total Area [in$^2$]', 'Interpreter', 'latex', 'FontSize', 15);
-% ylabel('Efficiency [\%]',     'Interpreter', 'latex', 'FontSize', 15);
-% title('Pareto Front: Efficiency vs Total Area');
-% legend('Location', 'best');
-% set(gca, 'FontSize', 12);
+[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
+
+Lr_3DFigure(Lr_design)
+
+%% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
+fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
+
+out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
+    [], [], 10000, GaNData, SiCData);
+
+try
+    pareto   = out1.best.pareto;
+    T_pareto = struct2table(pareto);
+
+    wantedVars = {'device_name','jj','P_cond_W','P_off_W','P_gate_W','loss_W','area_mm2'};
+    if all(ismember(wantedVars, T_pareto.Properties.VariableNames))
+        T_pareto = T_pareto(:, wantedVars);
+        T_pareto.Properties.VariableNames = { ...
+            'DeviceName', 'ParallelCount', 'P_cond', 'P_off', ...
+            'P_gate', 'TotalLoss', 'TotalArea_mm2'};
+    end
+    disp(T_pareto);
+catch
+    warning('Could not display primary pareto table.');
+end
+
+%% ---------- SECONDARY SIDE SWITCH ANALYSIS ----------
+fprintf('\n--- SECONDARY SIDE SWITCH ANALYSIS ---\n');
+
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
+
+%% ---------- OVERALL EFFICIENCY / PARETO ----------
+fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
+
+effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+    Pmax, TX_design.P_total + Lr_design.P_total, (TX_design.A_footprint + Lr_design.A_footprint) * 1e6);
+
+[bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
+
+%% ---------- RESULTS SUMMARY ----------
+
+fprintf('\n====================================================\n');
+fprintf('RESULTS SUMMARY\n');
+fprintf('====================================================\n');
+
+
+fprintf('\n--- Transformer Summary ---\n');
+fprintf('  Volume:      %.4f cm^3\n', TX_design.Vc * 1e6);
+fprintf('  Temperature: %.2f C\n',    T_tx);
+fprintf('  Core loss:   %.2f W\n',    TX_design.P_core);
+fprintf('  Copper loss: %.2f W\n',    TX_design.P_pri + TX_design.P_sec);
+
+fprintf('\n--- Inductor Summary ---\n');
+fprintf('  Volume:      %.4f cm^3\n', Lr_design.Vc * 1e6);
+fprintf('  Temperature: %.2f C\n',   Lr_design.T_Lr);
+fprintf('  Core loss:   %.2f W\n',    Lr_design.P_core);
+fprintf('  Copper loss: %.2f W\n',    Lr_design.P_cond);
+
+fprintf('\n--- Augmented Pareto Table ---\n');
+disp(effTableAug);
+
+%% ================= PLOT: PARETO FRONT =================
+
+figure('Name', 'Pareto Front: Area vs Loss');
+hold on; grid on; box on;
+plot(effTableAug.PlotArea_in2, effTableAug.PlotLoss_W, ...
+    'LineStyle', '-', 'LineWidth', 1.8, 'Color', [0 0.4470 0.7410], ...
+    'Marker', 'o', 'MarkerSize', 7, 'DisplayName', topology);
+xlabel('Total Area [in$^2$]', 'Interpreter', 'latex', 'FontSize', 15);
+ylabel('Total Loss [W]',      'Interpreter', 'latex', 'FontSize', 15);
+title('Pareto Front: Total Loss vs Total Area');
+legend('Location', 'best');
+set(gca, 'FontSize', 12);
+
+figure('Name', 'Pareto Front: Area vs Efficiency');
+hold on; grid on; box on;
+plot(effTableAug.PlotArea_in2, effTableAug.PlotEfficiency_percent, ...
+    'LineStyle', '-', 'LineWidth', 1.8, 'Color', [0 0.4470 0.7410], ...
+    'Marker', 'o', 'MarkerSize', 7, 'DisplayName', topology);
+xlabel('Total Area [in$^2$]', 'Interpreter', 'latex', 'FontSize', 15);
+ylabel('Efficiency [\%]',     'Interpreter', 'latex', 'FontSize', 15);
+title('Pareto Front: Efficiency vs Total Area');
+legend('Location', 'best');
+set(gca, 'FontSize', 12);
 % 
 % %% ================= OPTIONAL: SAVE TABLES =================
 % 
 % % writetable(comparisonTable, 'Topology_Comparison_Table.xlsx');
 % % writetable(effTableAug,     'ParetoTable_3LevelMultitrack.xlsx');
 % 
-% fprintf('\nDone.\n');
+fprintf('\nDone.\n');
 % 
 % %% =========================================================
 % %% ================= LOCAL HELPER FUNCTIONS =================
 % %% =========================================================
 % 
-% function [bestSummary, tblOut] = extractBestPointSummary(tblIn, topologyName)
-% 
-%     tblOut   = tblIn;
-%     varNames = tblOut.Properties.VariableNames;
-% 
-%     effVar  = findExactOrDie(varNames, {'Efficiency'});
-%     areaVar = findExactOrDie(varNames, {'Area [mm2]', 'Area_mm2', 'Area_mm2_'});
-%     lossVar = findExactOrDie(varNames, {'Total Loss [W]', 'TotalLoss_W', 'Total_Loss_W', 'TotalLossW'});
-% 
-%     effData  = tblOut.(effVar);
-%     areaData = tblOut.(areaVar);
-%     lossData = tblOut.(lossVar);
-% 
-%     if max(effData) < 1.5
-%         effDataPercent = 100 * effData;
-%     else
-%         effDataPercent = effData;
-%     end
-% 
-%     mm2_to_in2 = 1 / (25.4^2);
-% 
-%     tblOut.PlotEfficiency_percent = effDataPercent;
-%     tblOut.PlotArea_mm2           = areaData;
-%     tblOut.PlotArea_in2           = areaData * mm2_to_in2;
-%     tblOut.PlotLoss_W             = lossData;
-% 
-%     [bestEff, bestIdx] = max(effDataPercent);
-% 
-%     bestSummary                         = struct();
-%     bestSummary.Topology                = string(topologyName);
-%     bestSummary.BestIdx                 = bestIdx;
-%     bestSummary.BestEfficiency_percent  = bestEff;
-%     bestSummary.BestSystemTotalArea_mm2 = areaData(bestIdx);
-%     bestSummary.BestSystemTotalArea_in2 = areaData(bestIdx) * mm2_to_in2;
-%     bestSummary.BestSystemTotalLoss_W   = lossData(bestIdx);
-%     bestSummary.NumParetoPoints         = height(tblOut);
-%     bestSummary.EfficiencyColumn        = string(effVar);
-%     bestSummary.AreaColumn              = string(areaVar);
-%     bestSummary.LossColumn              = string(lossVar);
-% end
-% 
-% function varName = findExactOrDie(varNames, candidates)
-%     varName = '';
-%     for i = 1:numel(candidates)
-%         hit = find(strcmp(varNames, candidates{i}), 1, 'first');
-%         if ~isempty(hit)
-%             varName = varNames{hit};
-%             return;
-%         end
-%     end
-%     error('Could not find any of these columns: %s', strjoin(candidates, ', '));
-% end
+function [bestSummary, tblOut] = extractBestPointSummary(tblIn, topologyName)
+
+    tblOut   = tblIn;
+    varNames = tblOut.Properties.VariableNames;
+
+    effVar  = findExactOrDie(varNames, {'Efficiency'});
+    areaVar = findExactOrDie(varNames, {'Area [mm2]', 'Area_mm2', 'Area_mm2_'});
+    lossVar = findExactOrDie(varNames, {'Total Loss [W]', 'TotalLoss_W', 'Total_Loss_W', 'TotalLossW'});
+
+    effData  = tblOut.(effVar);
+    areaData = tblOut.(areaVar);
+    lossData = tblOut.(lossVar);
+
+    if max(effData) < 1.5
+        effDataPercent = 100 * effData;
+    else
+        effDataPercent = effData;
+    end
+
+    mm2_to_in2 = 1 / (25.4^2);
+
+    tblOut.PlotEfficiency_percent = effDataPercent;
+    tblOut.PlotArea_mm2           = areaData;
+    tblOut.PlotArea_in2           = areaData * mm2_to_in2;
+    tblOut.PlotLoss_W             = lossData;
+
+    [bestEff, bestIdx] = max(effDataPercent);
+
+    bestSummary                         = struct();
+    bestSummary.Topology                = string(topologyName);
+    bestSummary.BestIdx                 = bestIdx;
+    bestSummary.BestEfficiency_percent  = bestEff;
+    bestSummary.BestSystemTotalArea_mm2 = areaData(bestIdx);
+    bestSummary.BestSystemTotalArea_in2 = areaData(bestIdx) * mm2_to_in2;
+    bestSummary.BestSystemTotalLoss_W   = lossData(bestIdx);
+    bestSummary.NumParetoPoints         = height(tblOut);
+    bestSummary.EfficiencyColumn        = string(effVar);
+    bestSummary.AreaColumn              = string(areaVar);
+    bestSummary.LossColumn              = string(lossVar);
+end
+
+function varName = findExactOrDie(varNames, candidates)
+    varName = '';
+    for i = 1:numel(candidates)
+        hit = find(strcmp(varNames, candidates{i}), 1, 'first');
+        if ~isempty(hit)
+            varName = varNames{hit};
+            return;
+        end
+    end
+    error('Could not find any of these columns: %s', strjoin(candidates, ', '));
+end

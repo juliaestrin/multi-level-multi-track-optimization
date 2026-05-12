@@ -26,25 +26,25 @@ f_per       = 0.25;
 
 % --- Transformer Design Specifications ---
 material_name = 'F80';
-w_max_TX = 70e-3;
-l_max_TX = 70e-3;
+w_max_TX = 50e-3;
+l_max_TX = 50e-3;
 gap_loc = 'all';
 TX_shape = 'round';
 
-w_max_Lr = 40e-3;
-l_max_Lr = 40e-3;
+w_max_Lr = 25e-3;
+l_max_Lr = 25e-3;
 
 Lr_shape = 'rectangle'; 
-Tmax = 105;
+Tmax = 100;
 
-h_prepreg = 0.227e-3;
-h_core    = 0.280e-3;
+h_prepreg = 0.1030e-3;
+h_core    = 0.1300e-3;
 
 % --- Transformer Fixed Parameters ---
 t_cu_pri  = 2 * 35e-6;
 t_cu_sec  = 2 * 35e-6;
 s_ct      = 0.5e-3;
-h_pcb     = 3.6e-3;
+h_pcb = 6*h_prepreg + 5*h_core + 12 * t_cu_pri;
 
 % --- Heat Sink Parameters ---
 R_plate    = 0.08;
