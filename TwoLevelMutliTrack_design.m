@@ -32,7 +32,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain
-percentReg  = 0.05;         % [-]    Line regulation tolerance
+percentReg  = 0.1;         % [-]    Line regulation tolerance
 f_per       = 0.25;         % [-]    Frequency range
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
@@ -41,8 +41,8 @@ material_name = 'F80';      % Core material selection
                             % Options: 'ML91S' (high freq), 'F80' (general),
                             %          'N87', 'N97', '3F4'
 
-w_max = 70e-3;             % [m] max transformer width [x-direction]
-l_max = 70e-3;             % [m] max allowable transformer length [y-direction]
+w_max = 40e-3;             % [m] max transformer width [x-direction]
+l_max = 40e-3;             % [m] max allowable transformer length [y-direction]
 gap_loc = 'all';           % gap location: 'center' or 'all' legs
 
 centerpost_shape = 'round';
@@ -160,7 +160,8 @@ design_params = struct( ...
     'T_water', T_water, ...
     'sig_grease', sig_grease, ...
     'd_grease', d_grease, ...
-    'gap_loc', gap_loc ...
+    'gap_loc', gap_loc, ...
+    'shape', 'rectangle' ...
     );
 design_params.N_min = 1;
 design_params.N_max = 20;
@@ -183,8 +184,9 @@ else
 end
 
 %% Lr Design 
-
-[x_opt_Lr, P_opt_Lr, results] = optimize_Lr(design_params)
+w_max = 30e-3; 
+l_max = 40e-3; 
+[x_opt_Lr, P_opt_Lr, results] = optimize_Lr(w_max, l_max, design_params)
 
 Lr_3DFigure(results)
 % %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
