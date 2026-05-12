@@ -39,7 +39,7 @@ function [x_opt, P_opt, exitflag] = optimize_for_N(N, params)
 
 lb = [1e-3,   2*params.s_ct,  0.1];
 ub = [10e-3, 10e-3,         0.5];
-x0 = [5e-3,   5e-3,           2];
+x0 = [5e-3,   5e-3,           0.5];
 
 objective = @(x) get_Ptotal(x, N, params);
 nonlcon   = @(x) constraints(x, N, params);

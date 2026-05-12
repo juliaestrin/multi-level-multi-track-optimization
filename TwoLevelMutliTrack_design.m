@@ -17,6 +17,7 @@ clear; close all; clc;
 addpath('Switch Functions');
 addpath('Transformer Design');
 addpath('LLC Design');
+addpath('Lr Design')
 
 %% ================= DESIGN SPECIFICATIONS =================
 
@@ -31,7 +32,7 @@ Pmin        = 0.1 * Pmax;   % [W]    Minimum output power (10% load)
 
 % --- LLC Resonant Tank Specifications ---
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain
-percentReg  = 0.05;          % [-]    Line regulation tolerance
+percentReg  = 0.05;         % [-]    Line regulation tolerance
 f_per       = 0.25;         % [-]    Frequency range
 Ln          = 5;            % [-]    Inductance ratio Lm/Lr
 
@@ -42,7 +43,7 @@ material_name = 'F80';      % Core material selection
 
 w_max = 70e-3;             % [m] max transformer width [x-direction]
 l_max = 70e-3;             % [m] max allowable transformer length [y-direction]
-gap_loc = 'all';        % gap location: 'center' or 'all' legs
+gap_loc = 'all';           % gap location: 'center' or 'all' legs
 
 centerpost_shape = 'round';
 stackup = '5Layer';
@@ -62,7 +63,7 @@ h_pcb = 3.6e-3;             % [m]    pcb height
 
 % --- Heat Sink Parameters ---
 R_plate    = 0.08;                          % [C/W]
-Area_plate = 152.4e-3 * 76.2e-3;           % [m^2]
+Area_plate = 152.4e-3 * 76.2e-3;            % [m^2]
 T_water    = 45;                            % [C]
 
 % --- Thermal Grease ---
@@ -166,12 +167,12 @@ design_params.N_max = 20;
 %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
 fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
-[x_opt, P_opt, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
+[x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
 
 T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease);
 
-Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
+%Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
 % Cps    = calc_Cps(TX_design);
 % f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
 
@@ -183,7 +184,7 @@ end
 
 %% Lr Design 
 
-[x_opt, P_opt, results] = optimize_Lr(design_params)
+[x_opt_Lr, P_opt_Lr, results] = optimize_Lr(design_params)
 
 Lr_3DFigure(results)
 % %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
