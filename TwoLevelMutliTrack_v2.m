@@ -79,8 +79,10 @@ u0          = 4 * pi * 1e-7; % [H/m]
 topology = "2-level Multitrack";
 fsw      = 1000e3;              % [Hz]
 f0       = fsw;                 % f0_factor = 1
-SiCData  = 'SiC Data tf.xlsx';
-GaNData  = 'GaN Data tf.xlsx';
+%SiCData  = 'SiC Data tf.xlsx';
+%GaNData  = 'GaN Data tf.xlsx';
+SiCData  = [];
+GaNData  = 'GaN Data Check.xlsx';
 
 fprintf('\n====================================================\n');
 fprintf('TOPOLOGY: %s\n', topology);
@@ -211,6 +213,8 @@ fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
 
 effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
     Pmax, TX_design.P_total, TX_design.A_footprint * 1e6);
+% effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+%     Pmax, 0, 0);
 
 [bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
 
