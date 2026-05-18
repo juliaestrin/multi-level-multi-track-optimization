@@ -56,7 +56,7 @@ topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
-GaNData     = 'GaN Data Check.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency
@@ -156,7 +156,7 @@ disp(T_pareto);
 
 % Evaluate series-parallel combinations
 % Series: 4, 6, 8 devices    Parallel: 4, 6, 8 devices
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
 
 % Calculate overall system efficiency and create pareto front including:
 %   - Transformer losses/area (core + copper)

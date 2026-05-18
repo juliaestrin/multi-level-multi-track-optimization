@@ -39,11 +39,13 @@ SecData = readtable(dataFile,'VariableNamingRule','preserve');
 
 Vout = 48;
 spacing = 4*(0.00254);
+via_pad = 5*(0.00254); % 4-6 mil 
 copper_oz = 2;
 copper_thick = (copper_oz/0.5)*0.00175; % [cm]
 board_thick_cm = 0.2; % [cm]
 Radius_via = 6*(0.00254);
-R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+%R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 
 pad_thick_cm = 0.16; % [cm]
 
@@ -83,8 +85,8 @@ for ii = 1:n_sw
     L_min = SecData{ii,7};
     W_min = SecData{ii,8};
 
-    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing));
-    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing));
+    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
@@ -112,7 +114,8 @@ for ii = 1:n_sw
 
         P_total(ii,k) = P_cond(ii,k) + P_gate(ii,k);
 
-        Rth_pw    = R_plate * Area_plate / (L_min * W_min);
+        %Rth_pw    = R_plate * Area_plate / (L_min * W_min);
+        Rth_pw    = 1; % Fxi this to be one
         Rth_inter = 6*(pad_thick_cm) / (L_min * W_min * 0.01); % [cm]
 
         P_per_device = P_total(ii,k) / jj;
@@ -240,6 +243,8 @@ best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list,
 out = struct();
 out.Power         = Power;
 out.f_sw_typ      = f_sw_typ;
+out.I_sec_pk      = I_sec_pk;
+out.I_rating      = I_rating;
 out.mode          = mode;
 out.max_para      = max_para;
 out.selected_para = selected_para;
