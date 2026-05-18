@@ -155,6 +155,7 @@ copper_thick = (copper_oz/0.5)*0.00175; % [cm]
 board_thick_cm = 0.2; % [cm]
 Radius_via = 6*(0.00254);
 R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+%R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 fprintf('the R_via is %d\n', R_via);
 
 pad_thick_cm = 0.16; % [cm]

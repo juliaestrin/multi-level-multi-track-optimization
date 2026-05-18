@@ -39,7 +39,7 @@ idx.GaN.Tjmax  = 11;
 idx.GaN.tf     = 13;
 idx.GaN.Qg     = 14;
 idx.GaN.Vg     = 15;
-idx.GaN.Pin_Area = 30;
+idx.GaN.Pin_Area = 25;
 idx.GaN.R_ds_25 = 26;
 
 % SiC indices
@@ -285,6 +285,8 @@ fprintf('Row ID: %d\n', rowID);
 fprintf('Parallel number jj: %d\n', jj);
 fprintf('Final Rds,on: %.6g Ohm\n', R_ds_final);
 fprintf('Final Tj: %.2f degC\n', T_j);
+fprintf('Number of Switches: %d\n', pri_sw_count);
+fprintf('Total Area: %.3f mm2\n', Area_total);
 fprintf('Total loss: %.3f W\n', P_total);
 fprintf('  Conduction loss: %.3f W\n', P_cond_total);
 fprintf('  Turn-off loss: %.3f W\n', P_off_total);
@@ -292,7 +294,7 @@ fprintf('  Gate loss: %.3f W\n', P_gate_total);
 fprintf('Iterations: %d\n', iter);
 
 
-fprintf('\n--- New code thermal check ---\n');
+fprintf('\n----- Thermal Check -----\n');
 fprintf('R_ds_25 = %.9f Ohm\n', R_ds_25);
 fprintf('R_ds_final = %.9f Ohm\n', R_ds_final);
 fprintf('P_per_device = %.6f W\n', P_per_device);
