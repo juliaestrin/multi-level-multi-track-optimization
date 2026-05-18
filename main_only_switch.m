@@ -56,7 +56,7 @@ topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
-GaNData     = 'GaN Data tf.xlsx';
+GaNData     = 'GaN Data Check.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency
@@ -119,7 +119,7 @@ fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
-out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
+out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, 9.751872, 1, 8, ...
     [], [], 10000, ...
     GaNData, SiCData);
 
