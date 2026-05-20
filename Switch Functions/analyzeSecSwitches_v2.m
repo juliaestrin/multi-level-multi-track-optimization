@@ -15,7 +15,7 @@ function out = analyzeSecSwitches_v2(Power, f_per, f_sw_typ, mode, max_para, sel
 
 %% ===================== Defaults =====================
 if nargin < 8 || isempty(dataFile)
-    dataFile = 'Sec Data.xlsx';
+    dataFile = 'Sec Data v2.xlsx';
 end
 if nargin < 7 || isempty(compare_list)
     compare_list = [];
@@ -82,8 +82,18 @@ T_per        = nan(n_sw,nJ);
 
 %% ===================== Main Loop =====================
 for ii = 1:n_sw
-    L_min = SecData{ii,7};
-    W_min = SecData{ii,8};
+    L_min = SecData{ii,8};
+    W_min = SecData{ii,9};
+    Rth_jc   = SecData{ii,4};
+    R_ds_max = SecData{ii,10};
+    Q_g      = SecData{ii,14}; % [nC]
+    V_g      = SecData{ii,15};
+    T_j_max  = SecData{ii,11};
+    Cooling  = SecData{ii,5};
+    Pin_Area = SecData{ii,25};
+    if isempty(Pin_Area) || isnan(Pin_Area)
+        Pin_Area = 0;
+    end
 
     N_L = floor(L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_W = floor(W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
@@ -92,19 +102,19 @@ for ii = 1:n_sw
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
     Area_fr4  = L_min*W_min - Area_vias;
     R_fr4     = 4350*(board_thick_cm*10)/Area_fr4;
-
-    Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
-
-    Rth_jc   = SecData{ii,4};
-    R_ds_max = SecData{ii,9};
-    Q_g      = SecData{ii,13}; % [nC]
-    V_g      = SecData{ii,14};
-    T_j_max  = SecData{ii,10};
+    
+    if string(Cooling) == "Top"
+        Rth_board_min = 0;
+        fprintf("Top: The thermal resistance of PCB is %d\n", Rth_board_min);
+    else
+        Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
+        fprintf("Bottom: The thermal resistance of PCB is %d\n", Rth_board_min);
+    end 
 
     for k = 1:nJ
         jj = jj_set(k);
 
-        Area(ii,k) = sec_sw_count * jj * L_min * W_min;
+        Area(ii,k) = sec_sw_count * jj * (L_min * W_min + Pin_Area);
 
         I_d = I_rating / jj;
 
