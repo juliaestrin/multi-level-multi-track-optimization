@@ -209,6 +209,7 @@ Rth_fr4_vec   = nan(n_sw,1);
 N_vias_vec    = nan(n_sw,1);
 Rth_pw_vec    = nan(n_sw,1);
 Rth_inter_vec = nan(n_sw,1);
+Rth_jc_vec = nan(n_sw,1);
 
 % Optional but useful for multilevel case
 T_j_25       = nan(n_sw,nJ);
@@ -273,6 +274,7 @@ for ii_global = 1:n_sw
     N_vias_vec(ii_global)    = N_vias_max;
     Rth_pw_vec(ii_global)    = Rth_pw;
     Rth_inter_vec(ii_global) = Rth_inter;
+    Rth_jc_vec(ii_global) = Rth_jc;
 
     for k = 1:nJ
         if topology == "Multilevel Multitrack"
@@ -541,9 +543,9 @@ end
 %% ===================== Outputs =====================
 ThermalTable = table( ...
     Meta.Tech, Meta.Name, N_vias_vec, Rth_via_vec, Rth_fr4_vec, ...
-    Rth_board_vec, Rth_inter_vec, Rth_pw_vec, ...
+    Rth_board_vec, Rth_inter_vec, Rth_pw_vec, Rth_jc_vec,...
     'VariableNames', {'Tech','Name','N_vias','Rth_single_via','Rth_FR4', ...
-                      'Rth_board','Rth_interface','Rth_plate'});
+                      'Rth_board','Rth_interface','Rth_plate','Rth_jc'});
 
 out = struct();
 out.ThermalTable  = ThermalTable;
