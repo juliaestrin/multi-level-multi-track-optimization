@@ -34,7 +34,6 @@ addpath('Switch Functions');     % Switch analysis functions
 addpath('Transformer Design');   % VIRT transformer design functions
 addpath('LLC Design');           % LLC resonant tank design functions
 
-
 %%  DESIGN SPECIFICATIONS
 fprintf('\n--- Design Specifications ---\n');
 
@@ -57,7 +56,7 @@ fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
 GaNData     = 'GaN Data tf.xlsx';
-SecData     = 'Sec Data v2.xlsx';
+SecData     = 'Sec Data Both.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency

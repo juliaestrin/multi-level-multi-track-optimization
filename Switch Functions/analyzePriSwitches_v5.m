@@ -159,7 +159,7 @@ Radius_via = 6*(0.00254);
 R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 fprintf('the R_via is %d\n', R_via);
 
-pad_thick_cm = 0.16; % [cm]
+inter_thick_cm = 0.16; % [cm]
 
 T_water = 45;
 
@@ -264,8 +264,8 @@ for ii_global = 1:n_sw
         fprintf("Bottom: The thermal resistance of PCB is %d\n", Rth_board_min);
     end 
 
-    Rth_pw    = 1; % Fxi this to be one
-    Rth_inter = 6*(pad_thick_cm) / (L_min * W_min * 0.01); % [cm]
+    Rth_pw    = 1; % Fix this to be one
+    Rth_inter = 6*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
     
     Rth_board_vec(ii_global) = Rth_board_min;
     Rth_via_vec(ii_global)   = R_via;

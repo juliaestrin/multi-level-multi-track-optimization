@@ -43,11 +43,11 @@ via_pad = 5*(0.00254); % 4-6 mil
 copper_oz = 2;
 copper_thick = (copper_oz/0.5)*0.00175; % [cm]
 board_thick_cm = 0.2; % [cm]
-Radius_via = 6*(0.00254);
+Radius_via = 6*(0.00254); % [cm]
 %R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
 R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 
-pad_thick_cm = 0.16; % [cm]
+inter_thick_cm = 0.16; % [cm]
 
 T_water = 45;
 
@@ -90,7 +90,7 @@ for ii = 1:n_sw
     V_g      = SecData{ii,15};
     T_j_max  = SecData{ii,11};
     Cooling  = SecData{ii,5};
-    Pin_Area = SecData{ii,25};
+    Pin_Area = SecData{ii,16};
     if isempty(Pin_Area) || isnan(Pin_Area)
         Pin_Area = 0;
     end
@@ -126,7 +126,7 @@ for ii = 1:n_sw
 
         %Rth_pw    = R_plate * Area_plate / (L_min * W_min);
         Rth_pw    = 1; % Fxi this to be one
-        Rth_inter = 6*(pad_thick_cm) / (L_min * W_min * 0.01); % [cm]
+        Rth_inter = 6*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
 
         P_per_device = P_total(ii,k) / jj;
 
@@ -215,7 +215,7 @@ sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1
 
 % ---- Top-N selection ----
 rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
-rank.N_keep  = 20;        % number of devices to keep
+rank.N_keep  = 30;        % number of devices to keep
 rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
 
 % Apply mode rule to jj_list (overlap behavior)
