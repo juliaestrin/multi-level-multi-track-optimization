@@ -97,6 +97,9 @@ Bsat  = material.Bsat;
 total_iter = nLn * nReg;
 iter = 0;
 
+results = struct();   
+result_idx = 0;
+
 fprintf('\nStarting sweep: %d Ln values × %d percentReg values = %d designs\n\n', ...
     nLn, nReg, total_iter);
 
@@ -171,14 +174,40 @@ for iReg = 1:nReg
             out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
 
             %% --- Efficiency / Pareto ---
-            passive_loss  = TX_design.P_total + Lr_design.P_total;
-            passive_area  = (TX_design.A_footprint + Lr_design.A_footprint) * 1e6; % mm²
+            passive_loss  = TX_design.P_total + 2*Lr_design.P_total;
+            passive_area  = (TX_design.A_footprint + 2*Lr_design.A_footprint) * 1e6; % mm²
 
             effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
                 Pmax, passive_loss, passive_area, [], [], false, false);
 
             Loss_mat(iReg, iLn) = effOut.points(1).loss_W;
             Area_mat(iReg, iLn) = effOut.points(1).area_mm2;
+            
+            result_idx = result_idx + 1;
+            results(result_idx).Ln          = Ln;
+            results(result_idx).percentReg  = percentReg;
+            results(result_idx).iLn         = iLn;
+            results(result_idx).iReg        = iReg;
+            % LLC Tank
+            results(result_idx).Lm          = Lu;
+            results(result_idx).Lr          = Llk;
+            results(result_idx).Ir_rms      = Ir_rms;
+            results(result_idx).Ir_pk       = Ir_pk;
+            results(result_idx).N           = N;
+            results(result_idx).np          = np;
+            % Transformer
+            results(result_idx).TX_P_total      = TX_design.P_total;
+            results(result_idx).TX_A_footprint  = TX_design.A_footprint;
+            % Lr
+            results(result_idx).Lr_P_total      = Lr_design.P_total;
+            results(result_idx).Lr_A_footprint  = Lr_design.A_footprint;
+            % Overall
+            results(result_idx).passive_loss    = passive_loss;
+            results(result_idx).passive_area_mm2= passive_area;
+            results(result_idx).loss_W          = Loss_mat(iReg, iLn);
+            results(result_idx).area_mm2        = Area_mat(iReg, iLn);
+            results(result_idx).area_in2        = Area_mat(iReg, iLn) * 0.00155;
+            results(result_idx).efficiency_pct  = (Pmax - Loss_mat(iReg, iLn)) / Pmax * 100;
 
             % fprintf('Loss = %6.2f W,  Area = %7.2f mm²\n', ...
             %     Loss_mat(iReg, iLn), Area_mat(iReg, iLn));

@@ -60,9 +60,14 @@ function result = calculateVIRT_round_2LMT(b, w, k_area, params)
     end
     
     % Flux densities — center post carries full flux, each outer leg carries half
-    result.Bmax_center = 2*params.Vo / (4*params.f * Ac_center);
-    result.Bmax_legs   = 2*params.Vo / (4*params.f * 2 * Ac_legs);   % legs + yokes
+    % result.Bmax_center = 2*params.Vo / (4*params.f * Ac_center);
+    % result.Bmax_legs   = 2*params.Vo / (4*params.f * 2 * Ac_legs);   % legs + yokes
     
+   result.Bmax_center = params.Vin / (8 * 8 *params.f * Ac_center);
+    result.Bmax_legs   = params.Vin / (8 * 8 *params.f * 2 * Ac_legs);   % legs + yokes
+
+    
+
     % Core loss — each region at its own Bmax
     result.P_core = params.k * params.f^(params.alpha) * ( ...
         V_center * result.Bmax_center^(params.beta) + ...
