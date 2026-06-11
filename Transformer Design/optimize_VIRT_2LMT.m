@@ -5,7 +5,7 @@ function [x_opt, P_opt, results] = optimize_VIRT_2LMT(w_max, l_max, params)
 %   k_area : ratio Ac_legs/Ac_center  [-]
 
 lb = [1e-3,        2*params.s_ct,  0.5];   % lower bounds
-ub = [2000e-3,     2000e-3,        0.5];   % upper bounds
+ub = [2000e-3,     2000e-3,        2];   % upper bounds
 x0 = [5e-3,        5e-3,           0.5];   % initial guess (0.5 = old behaviour)
 
 objective = @(x) get_Ptotal(x, params);
