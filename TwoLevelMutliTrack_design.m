@@ -51,7 +51,7 @@ l_max_Lr = 25e-3;
 TX_shape = 'round';
 Lr_shape = 'rectangle'; 
 stackup = '5Layer';
-Tmax = 100; 
+Tmax = 95; 
 
 % Prepreg/Core options: https://cdn.files-text.com/us-south1/api/lc/att/12933531/5ecb2f5812e859e88eaf9a75818cfc28/CN-LU-2209-S05-S1000-2M-S1000-2MB-DK.pdf
 % Thickness of pre-preg  (Glass Type: 7628, RC Nominal: 52) [m]
@@ -177,7 +177,44 @@ design_params.N_max = 12;
 %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
 fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
-[x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
+% [x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
+
+% --- k_area sweep ---
+k_area_sweep  = 0.1:0.01:2;
+P_sweep       = zeros(size(k_area_sweep));
+results_sweep = cell(size(k_area_sweep));
+
+fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+
+for i = 1:numel(k_area_sweep)
+    params_i        = design_params;
+    params_i.k_area = k_area_sweep(i);
+
+    [x_opt_i, P_opt_i, res_i] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, params_i);
+
+    P_sweep(i)       = P_opt_i;
+    results_sweep{i} = res_i;
+
+    fprintf('  k_area = %.2f  →  P_total = %.2f W  (b = %.1f mm, w = %.1f mm)\n', ...
+        k_area_sweep(i), P_opt_i, res_i.b*1e3, res_i.w*1e3);
+end
+
+% Best design
+[P_opt_TX, idx_best] = min(P_sweep);
+TX_design            = results_sweep{idx_best};
+k_area_best          = k_area_sweep(idx_best);
+
+fprintf('\nBest: k_area = %.2f, P_total = %.2f W, b = %.1f mm, w = %.1f mm\n', ...
+    k_area_best, P_opt_TX, TX_design.b*1e3, TX_design.w*1e3);
+
+% Plot
+figure;
+plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+ylabel('P_{total} [W]');
+title('Optimal P_{total} vs k\_area');
+xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+grid on;
 
 T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease);
