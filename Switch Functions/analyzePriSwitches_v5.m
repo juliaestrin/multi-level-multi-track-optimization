@@ -2,6 +2,7 @@
 % V4: add pin areas for total area calculation
 % V5: -add thermal resistance calculation for via
 %     -fix via size error
+%     -Update thermal interface
 
 function out = analyzePriSwitches_v5(topology, f_per, Power, f_sw_typ, I_r, mode, max_para, selected_para, compare_list, max_total_loss, ganFile, sicFile)
 % Supports:
@@ -266,8 +267,12 @@ for ii_global = 1:n_sw
     end 
 
     Rth_pw    = 1; % Fix this to be one
-    Rth_inter = 6*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
     
+    % Use thermal interface: TG-A1780
+    % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
+    Rth_inter = (1/0.178)*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
+
+
     Rth_board_vec(ii_global) = Rth_board_min;
     Rth_via_vec(ii_global)   = R_via;
     Rth_fr4_vec(ii_global)   = R_fr4;

@@ -55,7 +55,7 @@ topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
-GaNData     = 'GaN Data tf.xlsx';
+GaNData     = 'GaN Data Check_v2.xlsx';
 SecData     = 'Sec Data Both.xlsx';
 
 % topology    = "Multilevel Multitrack";
@@ -68,7 +68,7 @@ SecData     = 'Sec Data Both.xlsx';
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
 percentReg  = 0.05;          % [-]    Line regulation tolerance (±10%)
 f_per       = 0.25;         % [-]    Frequency range (±25%)
-Ln          = 5;            % [-]    Inductance ratio Lm/Lr
+Ln          = 7;            % [-]    Inductance ratio Lm/Lr
 
 % --- Heat Sink Parameters ---
 % PN: 180-10-6C - https://wakefieldthermal.com/content/data_sheets/Standard%20Liquid%20Cold%20Plates.pdf
@@ -119,7 +119,7 @@ fprintf('  Qe_max:           %.4f\n', LLC_design.Qe_max);
 
 % Evaluate different parallelization options (1-8 devices in parallel)
 % for both GaN and SiC technologies
-out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, 9.751872, 1, 8, ...
+out1 = analyzePriSwitches_v5(topology, f_per, Pmax, fsw, Ir_rms, 1, 8, ...
     [], [], 10000, ...
     GaNData, SiCData);
 
@@ -174,7 +174,7 @@ out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 
 % Run enhanced efficiency calculation with table output and Pareto analysis:
 effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
-    Pmax, 0, 0);
+    Pmax, 41.87, 0);
 
 % Sweep with switching frequency
 % f_sw_list = [300e3, 400e3, 500e3];

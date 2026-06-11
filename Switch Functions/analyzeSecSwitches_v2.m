@@ -1,5 +1,6 @@
 % The function to analyze the secondary side switches
-% V2: fix thermal resistance + error
+% V2: -fix thermal resistance + error
+%     -Update thermal interface
 
 function out = analyzeSecSwitches_v2(Power, f_per, f_sw_typ, mode, max_para, selected_para, compare_list, dataFile)
 % Fig 1: ALL devices  -> (Loss vs jj) + (Tj vs jj)
@@ -126,7 +127,10 @@ for ii = 1:n_sw
 
         %Rth_pw    = R_plate * Area_plate / (L_min * W_min);
         Rth_pw    = 1; % Fxi this to be one
-        Rth_inter = 6*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
+
+        % Use thermal interface: TG-A1780
+        % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
+        Rth_inter = (1/0.178)*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
 
         P_per_device = P_total(ii,k) / jj;
 
