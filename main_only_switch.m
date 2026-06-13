@@ -55,7 +55,7 @@ topology    = "2-level Multitrack";
 fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
-GaNData     = 'GaN Data Check_v2.xlsx';
+GaNData     = 'GaN Data tf.xlsx';
 SecData     = 'Sec Data Both.xlsx';
 
 % topology    = "Multilevel Multitrack";
