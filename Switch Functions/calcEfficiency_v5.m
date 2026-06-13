@@ -1,5 +1,7 @@
 function effOut = calcEfficiency_v5(PriOut, SecOut, modePri, modeSec, Power, other_loss, other_area, marker_by_jj, figNum, showTable, doPlot)
-% calcEfficiency_v5: Printed Table only shows overall pareto front
+% calcEfficiency_v5: 
+%   1) Printed Table only shows overall pareto front
+%   2) All the candidates (pri pareto + sec pareto) are still saved 
 % Cases:
 %   1) neither side is "pareto" -> scalar result
 %   2) exactly one side is "pareto" -> point list + plots + table
