@@ -179,8 +179,54 @@ fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
 % [x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
 
+% % --- k_area sweep ---
+% k_area_sweep  = 0.1:0.01:2;
+% P_sweep       = zeros(size(k_area_sweep));
+% results_sweep = cell(size(k_area_sweep));
+% 
+% fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+% 
+% for i = 1:numel(k_area_sweep)
+%     params_i        = design_params;
+%     params_i.k_area = k_area_sweep(i);
+% 
+%     [x_opt_i, P_opt_i, res_i] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, params_i);
+% 
+%     P_sweep(i)       = P_opt_i;
+%     results_sweep{i} = res_i;
+% 
+%     fprintf('  k_area = %.2f  →  P_total = %.2f W  (b = %.1f mm, w = %.1f mm)\n', ...
+%         k_area_sweep(i), P_opt_i, res_i.b*1e3, res_i.w*1e3);
+% end
+% 
+% % Best design
+% [P_opt_TX, idx_best] = min(P_sweep);
+% TX_design            = results_sweep{idx_best};
+% k_area_best          = k_area_sweep(idx_best);
+% 
+% fprintf('\nBest: k_area = %.2f, P_total = %.2f W, b = %.1f mm, w = %.1f mm\n', ...
+%     k_area_best, P_opt_TX, TX_design.b*1e3, TX_design.w*1e3);
+% 
+% % Plot
+% figure;
+% plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+% xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+% ylabel('P_{total} [W]');
+% title('Optimal P_{total} vs k\_area');
+% xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+% grid on;
+
+% if strcmp(TX_shape, 'round')
+%     VIRT3Dfigure_round(TX_design, material, T_tx, 0);
+% else
+%     VIRT3Dfigure_square(TX_design, material, T_tx, 0);
+% end
+
+% --- VIRT RACETRACK TRANSFORMER OPTIMIZATION ---
+fprintf('\n--- VIRT RACETRACK TRANSFORMER OPTIMIZATION ---\n');
+
 % --- k_area sweep ---
-k_area_sweep  = 0.1:0.01:2;
+k_area_sweep  = 0.5:0.01:0.5;
 P_sweep       = zeros(size(k_area_sweep));
 results_sweep = cell(size(k_area_sweep));
 
@@ -189,14 +235,11 @@ fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
 for i = 1:numel(k_area_sweep)
     params_i        = design_params;
     params_i.k_area = k_area_sweep(i);
-
-    [x_opt_i, P_opt_i, res_i] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, params_i);
-
+    [x_opt_i, P_opt_i, res_i] = optimize_VIRT_raceTrack_2LMT(w_max_TX, l_max_TX, params_i);
     P_sweep(i)       = P_opt_i;
     results_sweep{i} = res_i;
-
-    fprintf('  k_area = %.2f  →  P_total = %.2f W  (b = %.1f mm, w = %.1f mm)\n', ...
-        k_area_sweep(i), P_opt_i, res_i.b*1e3, res_i.w*1e3);
+    fprintf('  k_area = %.2f  →  P_total = %.2f W, A = %.2f in^2 (a = %.1f mm, b = %.1f mm, w = %.1f mm)\n', ...
+        k_area_sweep(i), P_opt_i, res_i.A_footprint*1550,  res_i.a*1e3, res_i.b*1e3, res_i.w*1e3);
 end
 
 % Best design
@@ -204,30 +247,27 @@ end
 TX_design            = results_sweep{idx_best};
 k_area_best          = k_area_sweep(idx_best);
 
-fprintf('\nBest: k_area = %.2f, P_total = %.2f W, b = %.1f mm, w = %.1f mm\n', ...
-    k_area_best, P_opt_TX, TX_design.b*1e3, TX_design.w*1e3);
+fprintf('\nBest: k_area = %.2f, P_total = %.2f W, a = %.1f mm, b = %.1f mm, w = %.1f mm\n', ...
+    k_area_best, P_opt_TX, TX_design.a*1e3, TX_design.b*1e3, TX_design.w*1e3);
 
 % Plot
 figure;
 plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
 xlabel('k\_area  (A_{c,legs} / A_{c,center})');
 ylabel('P_{total} [W]');
-title('Optimal P_{total} vs k\_area');
+title('Optimal P_{total} vs k\_area  [Racetrack VIRT]');
 xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
 grid on;
 
 T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
     R_plate, Area_plate, T_water, sig_grease, d_grease);
 
+VIRT3Dfigure_raceTrack(TX_design, material, T_tx, 0)
 %Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
 % Cps    = calc_Cps(TX_design);
 % f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
 
-if strcmp(TX_shape, 'round')
-    VIRT3Dfigure_round(TX_design, material, T_tx, 0);
-else
-    VIRT3Dfigure_square(TX_design, material, T_tx, 0);
-end
+
 
 %% Lr Design 
 design_params.Lr = design_params.Lr - calc_Llk(design_params, TX_design, h_prepreg, h_core); 
