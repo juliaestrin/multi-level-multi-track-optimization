@@ -173,8 +173,11 @@ out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 %     Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
 
 % Run enhanced efficiency calculation with table output and Pareto analysis:
-effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
-    Pmax, 41.87, 0);
+% effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
+%     Pmax, 60, 645.16);
+
+effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
+    Pmax, 0, 0);
 
 % Sweep with switching frequency
 % f_sw_list = [300e3, 400e3, 500e3];
