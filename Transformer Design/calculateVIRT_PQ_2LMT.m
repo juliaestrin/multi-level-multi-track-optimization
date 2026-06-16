@@ -1,18 +1,22 @@
-function result = calculateVIRT_raceTrack_2LMT(a, b, w, k_area, params)
+function result = calculateVIRT_PQ_2LMT(b, w, k_area, params)
     % Derived geometry
-    Ac_center   = pi * (b/2)^2 + b * (a - b);
+    a           = b;
+    Ac_center   = pi * (b/2)^2;
     Ac_legs     = k_area * Ac_center;          % outer leg area (each)
-    w_leg       = Ac_legs / a;                 % outer leg width
+    %w_leg       = w + sqrt(2*Ac_legs/pi + w^2);                 % outer leg width
+    t = acos((b/2)/(b/2+w)); 
+    w_leg = (-b * t - 2* t*w + sqrt(t*(4*Ac_legs + t * (b + 2* w)^2)))/(2* t); 
     w_tot       = 2*w + b + 2*w_leg;
     w_winding   = w - 2*params.s_ct;
     h_w         = w/4 + params.h_pcb;
-    l           = a + 2*w_winding + 2*params.s_ct;
+    %l           = a + 2*w_winding + 2*params.s_ct + 2*w_leg;
+    l = w_tot; 
     h           = h_w + 2*w_leg;
     
     % Core sub-volumes
-    V_center    = Ac_center * h_w;                   % round center post
-    V_legs      = 2 * w_leg * a * h_w;                % two outer legs
-    V_yokes     = 2 * w_tot * a * w_leg;              % top + bottom yokes
+    V_center    = pi*(b/2)^2 * h_w;                   % round center post
+    V_legs      = 2 * Ac_legs * h_w;                % two outer legs
+    V_yokes     = 2* w_leg * pi * (b/2 + w + w_leg)^2 ;              % top + bottom yokes
     Vc          = V_center + V_legs + V_yokes;
     
     % Initialize result struct with geometry
@@ -72,9 +76,7 @@ function result = calculateVIRT_raceTrack_2LMT(a, b, w, k_area, params)
     
     sigma_1MHz = params.sigma_1MHz; 
 
-    %Pv_eddy_center = (8/pi^2) * (pi/4) * sigma_1MHz * Ac_center * params.f^2 * result.Bmax_center^2; 
-
-    Pv_eddy_center = (8/pi^2) * (pi/4) * sigma_1MHz * b * params.f^2 * result.Bmax_center^2; 
+    Pv_eddy_center = (8/pi^2) * (pi/4) * sigma_1MHz * Ac_center * params.f^2 * result.Bmax_center^2; 
     P_eddy_center = Pv_eddy_center * V_center; 
 
     Pv_eddy_legs = (8/pi^2) * (pi/6) * sigma_1MHz * w_leg^2 * params.f^2 * result.Bmax_legs^2;
@@ -87,8 +89,10 @@ function result = calculateVIRT_raceTrack_2LMT(a, b, w, k_area, params)
     result.Pv = result.P_core / Vc * 1e-3;   % [kW/m^3]
     
     % Winding resistance
-    result.Rdc_pri = calculate_Rdc_raceTrack(1000, a + 2*params.s_ct, b + 2*params.s_ct, w_winding, params.sigma_cu, params.t_cu_pri);
-    result.Rdc_sec = calculate_Rdc_raceTrack(1000, a + 2*params.s_ct, b + 2*params.s_ct, w_winding, params.sigma_cu, params.t_cu_sec);
+    result.Rdc_pri = calculate_Rdc_round(100, b/2 + params.s_ct, ...
+        b/2 + params.s_ct + w_winding, params.sigma_cu, params.t_cu_pri);
+    result.Rdc_sec = calculate_Rdc_round(100, b/2 + params.s_ct, ...
+        b/2 + params.s_ct + w_winding, params.sigma_cu, params.t_cu_sec);
     
     % Conduction losses
     [result.P_pri, result.P_sec] = calculate_Pcond_2LMT( ...
