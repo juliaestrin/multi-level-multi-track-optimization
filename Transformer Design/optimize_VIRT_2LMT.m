@@ -6,7 +6,7 @@ end
 % Optimization variables: x = [b, w]
 % k_area is fixed via params.k_area and swept externally
 
-k_area = params.k_area;
+%k_area = params.k_area;
 
 lb = [1e-3,    2*params.s_ct];
 ub = [2000e-3, 2000e-3      ];
