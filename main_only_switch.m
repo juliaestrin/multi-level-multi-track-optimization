@@ -177,7 +177,7 @@ out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 %     Pmax, 60, 645.16);
 
 effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
-    Pmax, 0, 0);
+    Pmax, 50, (2+3.7)*645.16);
 
 % Sweep with switching frequency
 % f_sw_list = [300e3, 400e3, 500e3];
