@@ -156,22 +156,22 @@ design_params = struct( ...
     );
 
 %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
-fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
-
-[x_opt, P_opt, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
-
-T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac, TX_design.h_w, ...
-    R_plate, Area_plate, T_water, sig_grease, d_grease);
-
-Llk_TX = calc_Llk(design_params, TX_design); 
-% Cps    = calc_Cps(TX_design);
-% f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
-
-if strcmp(centerpost_shape, 'round')
-    VIRT3Dfigure_round(TX_design, material, T_tx, 0);
-else
-    VIRT3Dfigure_square(TX_design, material, T_tx, 0);
-end
+% fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
+% 
+% [x_opt, P_opt, TX_design] = optimize_VIRT_2LMT(w_max, l_max, design_params);
+% 
+% T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac, TX_design.h_w, ...
+%     R_plate, Area_plate, T_water, sig_grease, d_grease);
+% 
+% Llk_TX = calc_Llk(design_params, TX_design); 
+% % Cps    = calc_Cps(TX_design);
+% % f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
+% 
+% if strcmp(centerpost_shape, 'round')
+%     VIRT3Dfigure_round(TX_design, material, T_tx, 0);
+% else
+%     VIRT3Dfigure_square(TX_design, material, T_tx, 0);
+% end
 
 %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
 fprintf('\n--- PRIMARY SIDE SWITCH ANALYSIS ---\n');
@@ -198,13 +198,16 @@ end
 %% ---------- SECONDARY SIDE SWITCH ANALYSIS ----------
 fprintf('\n--- SECONDARY SIDE SWITCH ANALYSIS ---\n');
 
-out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4],'Sec Data Both.xlsx');
 
 %% ---------- OVERALL EFFICIENCY / PARETO ----------
 fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
 
-effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
-    Pmax, TX_design.P_total, TX_design.A_footprint * 1e6);
+% effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+%     Pmax, TX_design.P_total, TX_design.A_footprint * 1e6);
+
+effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
+    Pmax, 0, 0);
 
 [bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
 
