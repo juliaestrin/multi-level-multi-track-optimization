@@ -2,7 +2,8 @@
 % V4: add pin areas for total area calculation
 % V5: -add thermal resistance calculation for via
 %     -fix via size error
-%     -Update thermal interface
+%     -update thermal interface
+%     -change the thermal via part to half of area
 
 function out = analyzePriSwitches_v5(topology, f_per, Power, f_sw_typ, I_r, mode, max_para, selected_para, compare_list, max_total_loss, ganFile, sicFile)
 % Supports:
@@ -250,8 +251,8 @@ for ii_global = 1:n_sw
     Cooling  = T{ii, map.Cool};
 
     % ---- footprint-dependent via/board thermal ----
-    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
-    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_L = floor(0.5*L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_W = floor(0.5*W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]

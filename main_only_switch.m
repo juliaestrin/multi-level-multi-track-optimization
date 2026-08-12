@@ -157,7 +157,7 @@ disp(T_pareto);
 % Evaluate series-parallel combinations
 % Series: 4, 6, 8 devices    Parallel: 4, 6, 8 devices
 % Fix this at 4 devices to see.
-out2 = analyzeSecSwitches_v5(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 
 % Calculate overall system efficiency and create pareto front including:
 %   - Transformer losses/area (core + copper)
@@ -177,7 +177,7 @@ out2 = analyzeSecSwitches_v5(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 %     Pmax, 60, 645.16);
 
 effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
-    Pmax, 50, (2+3.7)*645.16);
+    Pmax, 0, 0);
 
 % Sweep with switching frequency
 % f_sw_list = [300e3, 400e3, 500e3];
