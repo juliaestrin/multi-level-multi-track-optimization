@@ -251,12 +251,12 @@ for ii_global = 1:n_sw
     Cooling  = T{ii, map.Cool};
 
     % ---- footprint-dependent via/board thermal ----
-    N_L = floor(0.5*L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
-    N_W = floor(0.5*W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_L = floor(0.6*L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_W = floor(0.6*W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
-    Area_fr4  = L_min*W_min - Area_vias; % [mm2]
+    Area_fr4  = 0.34*L_min*W_min - Area_vias; % [mm2]
     R_fr4     = 4350*(board_thick_cm*10)/Area_fr4;
 
     if string(Cooling) == "Top"
@@ -271,7 +271,7 @@ for ii_global = 1:n_sw
     
     % Use thermal interface: TG-A1780
     % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
-    Rth_inter = (1/0.178)*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
+    Rth_inter = (1/0.178)*(inter_thick_cm) / (0.34*L_min*W_min*0.01); % [cm]
 
 
     Rth_board_vec(ii_global) = Rth_board_min;
