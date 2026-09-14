@@ -69,7 +69,7 @@ Rth_inter = (1/0.178)*(inter_thick_cm) / (L_min* W_min * 0.01); % [cm]
 fprintf("the R_inter is %d\n", Rth_inter);
 
 %% Loss Calculation
-Pout = 6.25e3;
+Pout = 1e3;
 Vout = 48;
 Iout = Pout/Vout;
 Ir_pk = Iout*pi/2;

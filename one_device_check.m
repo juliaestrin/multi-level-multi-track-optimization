@@ -7,12 +7,14 @@ addpath('Switch Functions');
 % GaN GS065-LR
 Data = readtable("Switch Functions\OneDevice.xlsx");
 
-spacing = 4*(0.00254);
+spacing = 6.25*(0.00254);
 via_pad = 5*(0.00254); % 4-6 mil 
-copper_oz = 2;
-copper_thick = (copper_oz/0.5)*0.00175; % [cm]
+%copper_oz = 2;
+%copper_thick = (copper_oz/0.5)*0.00175; % [cm]
+copper_thick = 50*1e-4; % [cm]
 board_thick_cm = 0.2472; % [cm]
-Radius_via = 6*(0.00254); % [cm]
+%Radius_via = 6*(0.00254); % [cm]
+Radius_via = 0.02;
 R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
 %R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 fprintf('the R_via is %d\n', R_via);
@@ -46,10 +48,11 @@ V_g      = Data{1,15};
 % Thermal Vias
 Thermal_L = Data{1,26};
 Thermal_W = Data{1,27};
-N_L = floor(Thermal_L*0.1/(2*Radius_via+2*spacing+2*via_pad));
-N_W = floor(Thermal_W*0.1/(2*Radius_via+2*spacing+2*via_pad));
+%N_L = floor(Thermal_L*0.1/(2*Radius_via+2*spacing+2*via_pad));
+%N_W = floor(Thermal_W*0.1/(2*Radius_via+2*spacing+2*via_pad));
 
-N_vias_max = N_L*N_W;
+%N_vias_max = N_L*N_W;
+N_vias_max = 32;
 fprintf("the maximum number of vias is %d \n", N_vias_max);
 
 Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
