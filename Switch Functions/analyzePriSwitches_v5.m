@@ -256,7 +256,7 @@ for ii_global = 1:n_sw
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
-    Area_fr4  = 0.34*L_min*W_min - Area_vias; % [mm2]
+    Area_fr4  = 0.36*L_min*W_min - Area_vias; % [mm2]
     R_fr4     = 4350*(board_thick_cm*10)/Area_fr4;
 
     if string(Cooling) == "Top"

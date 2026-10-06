@@ -126,7 +126,7 @@ for ii = 1:n_sw
         P_total(ii,k) = P_cond(ii,k) + P_gate(ii,k);
 
         %Rth_pw    = R_plate * Area_plate / (L_min * W_min);
-        Rth_pw    = 1; % Fxi this to be one
+        Rth_pw    = 1; % Fix this to be one
 
         % Use thermal interface: TG-A1780
         % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
