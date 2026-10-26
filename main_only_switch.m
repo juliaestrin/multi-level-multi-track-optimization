@@ -34,7 +34,6 @@ addpath('Switch Functions');     % Switch analysis functions
 addpath('Transformer Design');   % VIRT transformer design functions
 addpath('LLC Design');           % LLC resonant tank design functions
 
-
 %%  DESIGN SPECIFICATIONS
 fprintf('\n--- Design Specifications ---\n');
 
@@ -57,6 +56,7 @@ fsw         = 1000e3;        % [Hz]   FCML switching frequency
 f0          = fsw;        % [Hz]   Transformer frequency
 SiCData     = [];
 GaNData     = 'GaN Data tf.xlsx';
+SecData     = 'Sec Data Both.xlsx';
 
 % topology    = "Multilevel Multitrack";
 % fsw         = 500e3;        % [Hz]   FCML switching frequency
@@ -68,7 +68,7 @@ GaNData     = 'GaN Data tf.xlsx';
 Mg_nom      = 1.0;          % [-]    Nominal LLC gain (unity at resonance)
 percentReg  = 0.05;          % [-]    Line regulation tolerance (±10%)
 f_per       = 0.25;         % [-]    Frequency range (±25%)
-Ln          = 5;            % [-]    Inductance ratio Lm/Lr
+Ln          = 7;            % [-]    Inductance ratio Lm/Lr
 
 % --- Heat Sink Parameters ---
 % PN: 180-10-6C - https://wakefieldthermal.com/content/data_sheets/Standard%20Liquid%20Cold%20Plates.pdf
@@ -156,7 +156,8 @@ disp(T_pareto);
 
 % Evaluate series-parallel combinations
 % Series: 4, 6, 8 devices    Parallel: 4, 6, 8 devices
-out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
+% Fix this at 4 devices to see.
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], SecData);
 
 % Calculate overall system efficiency and create pareto front including:
 %   - Transformer losses/area (core + copper)
@@ -172,7 +173,10 @@ out2 = analyzeSecSwitches(Pmax, f0, 1, 10, [4 6 8], [4 6 8]);
 %     Pmax, opt.P_total_min, opt.opt_design.A_footprint * 1e6);
 
 % Run enhanced efficiency calculation with table output and Pareto analysis:
-effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+% effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
+%     Pmax, 60, 645.16);
+
+effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
     Pmax, 0, 0);
 
 % Sweep with switching frequency

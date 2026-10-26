@@ -2,6 +2,8 @@
 % V4: add pin areas for total area calculation
 % V5: -add thermal resistance calculation for via
 %     -fix via size error
+%     -update thermal interface
+%     -change the thermal via part to half of area
 
 function out = analyzePriSwitches_v5(topology, f_per, Power, f_sw_typ, I_r, mode, max_para, selected_para, compare_list, max_total_loss, ganFile, sicFile)
 % Supports:
@@ -150,14 +152,16 @@ end
 Vout = 48;
 %R_via = 134.83;
 spacing = 4*(0.00254);
+via_pad = 5*(0.00254); % 4-6 mil 
 copper_oz = 2;
 copper_thick = (copper_oz/0.5)*0.00175; % [cm]
 board_thick_cm = 0.2; % [cm]
 Radius_via = 6*(0.00254);
-R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
-%fprintf('the R_via is %d\n', R_via);
+%R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
+fprintf('the R_via is %d\n', R_via);
 
-pad_thick_cm = 0.16; % [cm]
+inter_thick_cm = 0.16; % [cm]
 
 T_water = 45;
 
@@ -207,6 +211,7 @@ Rth_fr4_vec   = nan(n_sw,1);
 N_vias_vec    = nan(n_sw,1);
 Rth_pw_vec    = nan(n_sw,1);
 Rth_inter_vec = nan(n_sw,1);
+Rth_jc_vec = nan(n_sw,1);
 
 % Optional but useful for multilevel case
 T_j_25       = nan(n_sw,nJ);
@@ -246,31 +251,36 @@ for ii_global = 1:n_sw
     Cooling  = T{ii, map.Cool};
 
     % ---- footprint-dependent via/board thermal ----
-    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing));
-    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing));
+    N_L = floor(0.6*L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_W = floor(0.6*W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
-    Area_fr4  = L_min*W_min - Area_vias; % [mm2]
+    Area_fr4  = 0.36*L_min*W_min - Area_vias; % [mm2]
     R_fr4     = 4350*(board_thick_cm*10)/Area_fr4;
 
     if string(Cooling) == "Top"
         Rth_board_min = 0;
-      %  fprintf("Top: The thermal resistance of PCB is %d\n", Rth_board_min);
+        fprintf("Top: The thermal resistance of PCB is %d\n", Rth_board_min);
     else
         Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
-       % fprintf("Bottom: The thermal resistance of PCB is %d\n", Rth_board_min);
+        fprintf("Bottom: The thermal resistance of PCB is %d\n", Rth_board_min);
     end 
 
-    Rth_pw    = R_plate * Area_plate / (L_min * W_min);
-    Rth_inter = 6*(pad_thick_cm) / (L_min * W_min * 0.01); % [cm]
+    Rth_pw    = 1; % Fix this to be one
     
+    % Use thermal interface: TG-A1780
+    % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
+    Rth_inter = (1/0.178)*(inter_thick_cm) / (0.34*L_min*W_min*0.01); % [cm]
+
+
     Rth_board_vec(ii_global) = Rth_board_min;
     Rth_via_vec(ii_global)   = R_via;
     Rth_fr4_vec(ii_global)   = R_fr4;
     N_vias_vec(ii_global)    = N_vias_max;
     Rth_pw_vec(ii_global)    = Rth_pw;
     Rth_inter_vec(ii_global) = Rth_inter;
+    Rth_jc_vec(ii_global) = Rth_jc;
 
     for k = 1:nJ
         if topology == "Multilevel Multitrack"
@@ -409,61 +419,61 @@ marker_by_jj{8}  = 'h';
 marker_by_jj{9}  = '<';
 marker_by_jj{10} = 'x';
 
-% %% ============================================================
-% % FIGURE 1: All devices  (GaN filled, SiC empty)
-% %% ============================================================
-% if topology ~= "Multilevel Multitrack"
-%     %% ============================================================
-%     % FIGURE 1: All devices  (GaN filled, SiC empty)
-%     %% ============================================================
-%     figure(2); clf;
-%     tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
-% 
-%     nexttile; hold on; grid on;
-%     for i = 1:n_sw
-%         isGaN = (Meta.Tech(i) == "GaN");
-%         if isGaN
-%             ls = '-o';
-%             mfc = colors(i,:);
-%         else
-%             ls = ':s';
-%             mfc = 'none';
-%         end
-% 
-%         plot(jj_set, P_total_plot(i,:), ls, ...
-%             'Color', colors(i,:), ...
-%             'MarkerEdgeColor', colors(i,:), ...
-%             'MarkerFaceColor', mfc, ...
-%             'LineWidth', 1.5, 'MarkerSize', 6);
-%     end
-%     xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-%     ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
-% 
-%     nexttile; hold on; grid on;
-%     for i = 1:n_sw
-%         isGaN = (Meta.Tech(i) == "GaN");
-%         if isGaN
-%             ls = '-o';
-%             mfc = colors(i,:);
-%         else
-%             ls = ':s';
-%             mfc = 'none';
-%         end
-% 
-%         plot(jj_set, T_j_plot(i,:), ls, ...
-%             'Color', colors(i,:), ...
-%             'MarkerEdgeColor', colors(i,:), ...
-%             'MarkerFaceColor', mfc, ...
-%             'LineWidth', 1.5, 'MarkerSize', 6);
-%     end
-%     xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-%     ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
-%     legend(Meta.Name,'Location','best','FontSize',10);
-% 
-%     sgtitle(sprintf('Primary Devices (%s) ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', ...
-%         strjoin(unique(Meta.Tech), " + "), Power/1e3, f_sw_typ/1e3), ...
-%         'Interpreter','latex','FontSize',15);
-% end
+%% ============================================================
+% FIGURE 1: All devices  (GaN filled, SiC empty)
+%% ============================================================
+if topology ~= "Multilevel Multitrack"
+    %% ============================================================
+    % FIGURE 1: All devices  (GaN filled, SiC empty)
+    %% ============================================================
+    figure(2); clf;
+    tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
+
+    nexttile; hold on; grid on;
+    for i = 1:n_sw
+        isGaN = (Meta.Tech(i) == "GaN");
+        if isGaN
+            ls = '-o';
+            mfc = colors(i,:);
+        else
+            ls = ':s';
+            mfc = 'none';
+        end
+
+        plot(jj_set, P_total_plot(i,:), ls, ...
+            'Color', colors(i,:), ...
+            'MarkerEdgeColor', colors(i,:), ...
+            'MarkerFaceColor', mfc, ...
+            'LineWidth', 1.5, 'MarkerSize', 6);
+    end
+    xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+    ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+
+    nexttile; hold on; grid on;
+    for i = 1:n_sw
+        isGaN = (Meta.Tech(i) == "GaN");
+        if isGaN
+            ls = '-o';
+            mfc = colors(i,:);
+        else
+            ls = ':s';
+            mfc = 'none';
+        end
+
+        plot(jj_set, T_j_plot(i,:), ls, ...
+            'Color', colors(i,:), ...
+            'MarkerEdgeColor', colors(i,:), ...
+            'MarkerFaceColor', mfc, ...
+            'LineWidth', 1.5, 'MarkerSize', 6);
+    end
+    xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+    ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
+    legend(Meta.Name,'Location','best','FontSize',10);
+
+    sgtitle(sprintf('Primary Devices (%s) ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', ...
+        strjoin(unique(Meta.Tech), " + "), Power/1e3, f_sw_typ/1e3), ...
+        'Interpreter','latex','FontSize',15);
+end
 
 %% ============================================================
 % FIGURE 2 / BEST selection
@@ -511,10 +521,10 @@ else
     rank.jj_list = [1 2 3 4 5 6 7 8];
     rank.jj_list = resolveRankJJList_v3(mode, rank.jj_list, max_para, selected_para);
 
-    % C = buildSelectedTopN(Area, P_total_plot, jj_set, Meta, colors, rank);
+    C = buildSelectedTopN(Area, P_total_plot, jj_set, Meta, colors, rank);
 
-    % plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
-    %     sprintf('Primary Devices TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 3);
+    plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
+        sprintf('Primary Devices TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 3);
 
     if isempty(compare_list)
         compare_list_used = jj_set;
@@ -539,9 +549,9 @@ end
 %% ===================== Outputs =====================
 ThermalTable = table( ...
     Meta.Tech, Meta.Name, N_vias_vec, Rth_via_vec, Rth_fr4_vec, ...
-    Rth_board_vec, Rth_inter_vec, Rth_pw_vec, ...
+    Rth_board_vec, Rth_inter_vec, Rth_pw_vec, Rth_jc_vec,...
     'VariableNames', {'Tech','Name','N_vias','Rth_single_via','Rth_FR4', ...
-                      'Rth_board','Rth_interface','Rth_plate'});
+                      'Rth_board','Rth_interface','Rth_plate','Rth_jc'});
 
 out = struct();
 out.ThermalTable  = ThermalTable;

@@ -1,5 +1,6 @@
 % The function to analyze the secondary side switches
-% V2: fix thermal resistance + error
+% V2: -fix thermal resistance + error
+%     -Update thermal interface
 
 function out = analyzeSecSwitches_v2(Power, f_per, f_sw_typ, mode, max_para, selected_para, compare_list, dataFile)
 % Fig 1: ALL devices  -> (Loss vs jj) + (Tj vs jj)
@@ -15,7 +16,7 @@ function out = analyzeSecSwitches_v2(Power, f_per, f_sw_typ, mode, max_para, sel
 
 %% ===================== Defaults =====================
 if nargin < 8 || isempty(dataFile)
-    dataFile = 'Sec_05_12_2026.xlsx';
+    dataFile = 'Sec Data v2.xlsx';
 end
 if nargin < 7 || isempty(compare_list)
     compare_list = [];
@@ -39,13 +40,15 @@ SecData = readtable(dataFile,'VariableNamingRule','preserve');
 
 Vout = 48;
 spacing = 4*(0.00254);
+via_pad = 5*(0.00254); % 4-6 mil 
 copper_oz = 2;
 copper_thick = (copper_oz/0.5)*0.00175; % [cm]
 board_thick_cm = 0.2; % [cm]
-Radius_via = 6*(0.00254);
-R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+Radius_via = 6*(0.00254); % [cm]
+%R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2)-pi*(Radius_via-copper_thick)^2);
+R_via = 0.25*(board_thick_cm)/(pi*(Radius_via^2));
 
-pad_thick_cm = 0.16; % [cm]
+inter_thick_cm = 0.16; % [cm]
 
 T_water = 45;
 
@@ -61,7 +64,7 @@ sec_sw_count = 4;
 %% ===================== Current rating =====================
 I_sec_pk = (pi/2)*(Vout/R_load);
 I_rating = ceil(I_sec_pk/5)*5;
-% fprintf("the I_sec_pk is %d\n",I_sec_pk);
+fprintf("the I_sec_pk is %d\n",I_sec_pk);
 % fprintf("the I_rating is %d\n",I_rating);
 
 %% ===================== Pre-allocate =====================
@@ -80,29 +83,39 @@ T_per        = nan(n_sw,nJ);
 
 %% ===================== Main Loop =====================
 for ii = 1:n_sw
-    L_min = SecData{ii,7};
-    W_min = SecData{ii,8};
+    L_min = SecData{ii,8};
+    W_min = SecData{ii,9};
+    Rth_jc   = SecData{ii,4};
+    R_ds_max = SecData{ii,10};
+    Q_g      = SecData{ii,14}; % [nC]
+    V_g      = SecData{ii,15};
+    T_j_max  = SecData{ii,11};
+    Cooling  = SecData{ii,5};
+    Pin_Area = SecData{ii,16};
+    if isempty(Pin_Area) || isnan(Pin_Area)
+        Pin_Area = 0;
+    end
 
-    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing));
-    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing));
+    N_L = floor(L_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
+    N_W = floor(W_min*0.1/(2*Radius_via+2*spacing+2*via_pad));
     N_vias_max = N_L*N_W;
 
     Area_vias = N_vias_max*pi*((Radius_via*10)^2); % [mm2]
     Area_fr4  = L_min*W_min - Area_vias;
     R_fr4     = 4350*(board_thick_cm*10)/Area_fr4;
-
-    Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
-
-    Rth_jc   = SecData{ii,4};
-    R_ds_max = SecData{ii,9};
-    Q_g      = SecData{ii,13}; % [nC]
-    V_g      = SecData{ii,14};
-    T_j_max  = SecData{ii,10};
+    
+    if string(Cooling) == "Top"
+        Rth_board_min = 0;
+        fprintf("Top: The thermal resistance of PCB is %d\n", Rth_board_min);
+    else
+        Rth_board_min = ((R_via/N_vias_max)*R_fr4/((R_via/N_vias_max)+R_fr4));
+        fprintf("Bottom: The thermal resistance of PCB is %d\n", Rth_board_min);
+    end 
 
     for k = 1:nJ
         jj = jj_set(k);
 
-        Area(ii,k) = sec_sw_count * jj * L_min * W_min;
+        Area(ii,k) = sec_sw_count * jj * (L_min * W_min + Pin_Area);
 
         I_d = I_rating / jj;
 
@@ -112,8 +125,12 @@ for ii = 1:n_sw
 
         P_total(ii,k) = P_cond(ii,k) + P_gate(ii,k);
 
-        Rth_pw    = R_plate * Area_plate / (L_min * W_min);
-        Rth_inter = 6*(pad_thick_cm) / (L_min * W_min * 0.01); % [cm]
+        %Rth_pw    = R_plate * Area_plate / (L_min * W_min);
+        Rth_pw    = 1; % Fix this to be one
+
+        % Use thermal interface: TG-A1780
+        % Thermal Conductivity: 17.8 W/(m*K) = 0.178 W/(cm*K)
+        Rth_inter = (1/0.178)*(inter_thick_cm) / (L_min * W_min * 0.01); % [cm]
 
         P_per_device = P_total(ii,k) / jj;
 
@@ -166,54 +183,54 @@ marker_by_jj{8}  = 'h';
 marker_by_jj{9}  = '<';
 marker_by_jj{10} = 'x';
 
-% %% ============================================================
-% % FIGURE 1: All devices
-% %% ============================================================
-% figure(4); clf;
-% tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
-% 
-% nexttile; hold on; grid on;
-% for i = 1:n_sw
-%     plot(jj_set, P_total_plot(i,:), '-o', ...
-%         'Color', colors(i,:), ...
-%         'MarkerFaceColor', colors(i,:), ...
-%         'LineWidth', 1.5, 'MarkerSize', 6);
-% end
-% xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-% ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
-% 
-% nexttile; hold on; grid on;
-% for i = 1:n_sw
-%     plot(jj_set, T_j_plot(i,:), '-o', ...
-%         'Color', colors(i,:), ...
-%         'MarkerFaceColor', colors(i,:), ...
-%         'LineWidth', 1.5, 'MarkerSize', 6);
-% end
-% xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
-% ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
-% legend(SecData.Name,'Location','best','FontSize',10);
-% 
-% sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
-%     'Interpreter','latex','FontSize',15);
-% 
-% %% ============================================================
-% % FIGURE 2: Top-N selection (Loss vs jj + Area vs Loss)
-% %% ============================================================
-% 
-% % ---- Top-N selection ----
-% rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
-% rank.N_keep  = 20;        % number of devices to keep
-% rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
-% 
-% % Apply mode rule to jj_list (overlap behavior)
-% rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
-% 
-% % Build selection (top-N by loss at jj_rank)
-% C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
-% 
-% plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
-%     sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 5);
-% 
+%% ============================================================
+% FIGURE 1: All devices
+%% ============================================================
+figure(4); clf;
+tiledlayout(1,2,'Padding','compact','TileSpacing','compact');
+
+nexttile; hold on; grid on;
+for i = 1:n_sw
+    plot(jj_set, P_total_plot(i,:), '-o', ...
+        'Color', colors(i,:), ...
+        'MarkerFaceColor', colors(i,:), ...
+        'LineWidth', 1.5, 'MarkerSize', 6);
+end
+xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+ylabel('Total Power Loss [W]','Interpreter','latex','FontSize',15);
+
+nexttile; hold on; grid on;
+for i = 1:n_sw
+    plot(jj_set, T_j_plot(i,:), '-o', ...
+        'Color', colors(i,:), ...
+        'MarkerFaceColor', colors(i,:), ...
+        'LineWidth', 1.5, 'MarkerSize', 6);
+end
+xlabel('Number of Parallel Switches','Interpreter','latex','FontSize',15);
+ylabel('Junction Temperature [$^{\circ}C$]','Interpreter','latex','FontSize',15);
+legend(SecData.Name,'Location','best','FontSize',10);
+
+sgtitle(sprintf('Secondary side ($P_{out}$=%.2f kW, $f_{sw}$=%.0f kHz)', Power/1e3, f_sw_typ/1e3), ...
+    'Interpreter','latex','FontSize',15);
+
+%% ============================================================
+% FIGURE 2: Top-N selection (Loss vs jj + Area vs Loss)
+%% ============================================================
+
+% ---- Top-N selection ----
+rank.jj_rank = 8;         % ABSOLUTE jj used for ranking (must be in jj_set)
+rank.N_keep  = 30;        % number of devices to keep
+rank.jj_list = [4 6 8];   % markers used on RIGHT tile only
+
+% Apply mode rule to jj_list (overlap behavior)
+rank.jj_list = resolveRankJJList(mode, rank.jj_list, max_para, selected_para);
+
+% Build selection (top-N by loss at jj_rank)
+C = buildSelectedTopN(Area, P_total_plot, jj_set, SecData, colors, rank);
+
+plotLossAndAreaFigure_OnePower(C, rank, marker_by_jj, ...
+    sprintf('Secondary side TOP-%d (rank at %d-parallel)', C.N_total, rank.jj_rank), 5);
+
 %% ============================================================
 % Best Devices (min loss, min area, min loss*area, and Pareto)
 %% ============================================================
@@ -240,6 +257,8 @@ best = pickBestDevices(Area, P_total_plot, Loss_Area_plot, jj_set, compare_list,
 out = struct();
 out.Power         = Power;
 out.f_sw_typ      = f_sw_typ;
+out.I_sec_pk      = I_sec_pk;
+out.I_rating      = I_rating;
 out.mode          = mode;
 out.max_para      = max_para;
 out.selected_para = selected_para;
@@ -255,7 +274,7 @@ out.P_total_plot  = P_total_plot;
 out.T_j_plot      = T_j_plot;
 out.T_per         = T_per;
 
-%out.rank          = rank;
+out.rank          = rank;
 
 out.compare_list_used = compare_list;
 out.best = best;
