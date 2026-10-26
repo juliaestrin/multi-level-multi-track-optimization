@@ -49,8 +49,8 @@ l_max_TX = 50e-3;             % [m] max allowable transformer length [y-directio
 
 gap_loc = 'all';           % gap location: 'center' or 'all' legs
 
-w_max_Lr = 25e-3; 
-l_max_Lr = 25e-3; 
+w_max_Lr = 32e-3; 
+l_max_Lr = 32e-3; 
 
 TX_shape = 'round';
 Lr_shape = 'rectangle'; 
@@ -403,9 +403,13 @@ end
 
 
 %% Lr Design 
-design_params.Lr = design_params.Lr - calc_Llk(design_params, TX_design, h_prepreg, h_core); 
-[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
+design_params.Bsat = 300e-3; 
+design_params.s_ct = 0.5e-3; 
+design_params.Lr = Llk - calc_Llk(design_params, TX_design, h_prepreg, h_core); 
+%[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
 
+[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr_EQ(w_max_Lr, l_max_Lr, design_params);
+Lr_design.shape = "round"; 
 Lr_3DFigure(Lr_design)
 
 %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
