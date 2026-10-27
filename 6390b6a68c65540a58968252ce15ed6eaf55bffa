@@ -1,0 +1,4 @@
+New script Ln_RegulationRange_Sweep_05_12_2026.m: sweeps Ln (Lm/Lr) and the line-regulation
+range, then plots total loss, efficiency and footprint area. Added the GaN_05_12_26 and
+Sec_05_12_2026 device sheets and updated analyzePriSwitches_v5 / analyzeSecSwitches_v2 /
+calcEfficiency_v4 to support the sweep.
