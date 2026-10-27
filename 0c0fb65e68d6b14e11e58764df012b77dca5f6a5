@@ -1,0 +1,3 @@
+optimize_VIRT_2LMT now takes k_area (outer-leg / center-post area ratio) as a fixed
+parameter instead of an optimization variable. TwoLevelMutliTrack_design.m sweeps
+k_area = 0.1 to 2 and keeps the lowest-loss design.
