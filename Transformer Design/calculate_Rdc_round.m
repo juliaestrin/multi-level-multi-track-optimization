@@ -6,7 +6,7 @@ function R = calculate_Rdc_round(r1, r2, sigma, t)
 %
 %   Inputs:
 %     r1    - inner radius [m]
-%     r2    - outer radius [m]   (0 < r1 < r2)
+%     r2    - outer radius [m]   (0 < r1 <= r2; r2 = r1 gives R = Inf)
 %     sigma - conductivity [S/m]
 %     t     - thickness [m]
 %   Output:
@@ -58,8 +58,8 @@ function R = calculate_Rdc_round(r1, r2, sigma, t)
 %     i.e. a straight strip of length 2*pi*r1, width (r2-r1), thickness t.
 %   ------------------------------------------------------------------
 
-    if ~(r1 > 0 && r2 > r1)
-        error('calculate_Rdc_round:badRadii', 'Require 0 < r1 < r2.');
+    if ~(r1 > 0 && r2 >= r1)
+        error('calculate_Rdc_round:badRadii', 'Require 0 < r1 <= r2.');
     end
     R = 2*pi ./ (sigma .* t .* log(r2 ./ r1));
 end
