@@ -1,0 +1,3 @@
+After the merge: TwoLevelMutliTrack_design.m now calls the switch functions the same way as
+main_only_switch_v2.m: passes 'Sec Data Both.xlsx' to analyzeSecSwitches_v2 (the default
+'Sec Data v2.xlsx' isn't in the repo) and uses calcEfficiency_v5's overallParetoTable.
