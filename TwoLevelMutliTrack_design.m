@@ -437,15 +437,15 @@ end
 %% ---------- SECONDARY SIDE SWITCH ANALYSIS ----------
 fprintf('\n--- SECONDARY SIDE SWITCH ANALYSIS ---\n');
 
-out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4 6 8], [4 6 8]);
+out2 = analyzeSecSwitches_v2(Pmax, f_per, f0, 1, 10, [4], [4], 'Sec Data Both.xlsx');
 
 %% ---------- OVERALL EFFICIENCY / PARETO ----------
 fprintf('\n--- OVERALL SYSTEM EFFICIENCY / PARETO ---\n');
 
-effOut = calcEfficiency_v4(out1, out2, "pareto", "pareto", ...
+effOut = calcEfficiency_v5(out1, out2, "pareto", "pareto", ...
     Pmax, TX_design.P_total + 2*Lr_design.P_total, (TX_design.A_footprint + Lr_design.A_footprint) * 1e6);
 
-[bestSummary, effTableAug] = extractBestPointSummary(effOut.table, topology);
+[bestSummary, effTableAug] = extractBestPointSummary(effOut.overallParetoTable, topology);
 
 %% ---------- RESULTS SUMMARY ----------
 
