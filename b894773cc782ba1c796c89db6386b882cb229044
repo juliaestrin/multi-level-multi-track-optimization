@@ -1,0 +1,6 @@
+Merge of origin/main (Qijia's switch-side work, up to ecbd18c) into Julia's local main.
+Brings in: the new switch thermal model in analyzePriSwitches_v5 / analyzeSecSwitches_v2
+(TG-A1780 interface, plate resistance = 1, vias on half the pad), calcEfficiency_v5
+(overall Pareto table), Sec Data Both and other device sheets, the single-device thermal
+checks (one_device_check*.m, Selected Switch Model/), designLLC_v4 tests, and the
+switch-only main_only_switch_v2.m.
