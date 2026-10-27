@@ -1,0 +1,3 @@
+Merge of branch jestrin_06_15_2026 into main (no conflicts). main now has both the switch-side
+work (Qijia) and the magnetics work (Julia): eddy loss, k_area sweep, the EQ inductor with a
+fringing gap model, and racetrack / PQ / round-EQ cores. The switch files keep main's versions.
