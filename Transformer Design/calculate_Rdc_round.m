@@ -1,89 +1,65 @@
-% Calculate Equivalent DC Resistance of a Round (Annular) Planar Winding
-%
-% Author:  Julia Estrin
-% Date:    03-27-2026
-%
-% Description:
-%   Computes the equivalent DC resistance of a round (annular) planar winding
-%   by modeling the total winding as (n+1) series-connected concentric circular
-%   turns, each with linearly increasing radius from the innermost turn (r_0)
-%   to the outermost turn (r_n). The per-turn resistances are then combined
-%   in parallel to yield the equivalent DC resistance.
-%
-%   Each turn is modeled as a circular loop with circumference 2*pi*r.
-%   The conductor cross-section is (radial width dr) x (thickness t_cu).
-%
-%   The loop iterates over (n+1) turns, indexed 0 through n, where n is
-%   the index of the outermost turn.
-%
-% Inputs:
-%   n       - Index of the outermost turn (loop runs from turn 0 to turn n)
-%   r_0     - Inner winding radius [m]
-%   r_n     - Outer winding radius [m]
-%   sig_cu  - Electrical conductivity of copper [S/m]
-%   t_cu    - Copper trace thickness [m]
-%
-% Outputs:
-%   Rdc     - Equivalent DC resistance of the winding [Ohm]
-%
-% Geometry Notes:
-%   - Each turn is a circular trace at radius r(i)
-%   - Trace length per turn: L(i) = 2 * pi * r(i)
-%   - Trace cross-section area: A = dr * t_cu
-%   - Per-turn resistance: R(i) = L(i) / (sig_cu * A) = 2*pi*r(i) / (sig_cu * dr * t_cu)
-%   - All turns combined in parallel for equivalent resistance
-%
-% Usage Example:
-%   % 100 turns from r=5mm to r=25mm, 2oz copper (70um), at 100°C
-%   Rdc = calculate_Rdc_round(100, 5e-3, 25e-3, 4.5e7, 70e-6);
+function R = calculate_Rdc_round(r1, r2, sigma, t)
 
-function Rdc = calculate_Rdc_round(n, r_0, r_n, sig_cu, t_cu)
+%CALCULATE_RDC_ROUND  DC resistance of a cut annulus, circumferential current.
+%
+%   R = calculate_Rdc_round(r1, r2, sigma, t)
+%
+%   Inputs:
+%     r1    - inner radius [m]
+%     r2    - outer radius [m]   (0 < r1 < r2)
+%     sigma - conductivity [S/m]
+%     t     - thickness [m]
+%   Output:
+%     R     - resistance [Ohm]
+%
+%   Result:
+%     R = 2*pi / (sigma * t * log(r2/r1))
+%
+%   ------------------------------------------------------------------
+%   DERIVATION
+%   ------------------------------------------------------------------
+%   Current flows around the ring (circumferentially), entering and
+%   leaving at the two faces of a radial cut.
+%
+%   1) Slice the annulus into thin rings of radius r and width dr.
+%
+%   2) Resistance of one ring, using R = L/(sigma*A):
+%        Path length:    L = 2*pi*(r + dr/2) = 2*pi*r + pi*dr
+%        Cross-section:  A = t*dr
+%
+%      The pi*dr term in L is a small correction to the finite 2*pi*r
+%      (relative size dr/(2r) -> 0), so L -> 2*pi*r. In A, dr is the
+%      whole quantity and must be kept.
+%
+%        dR = 2*pi*r / (sigma*t*dr)
+%
+%   3) All rings span the same cut, so they share the same voltage
+%      and are in PARALLEL. Parallel elements add as conductances:
+%
+%        dG = 1/dR = (sigma*t / (2*pi)) * dr/r
+%
+%   4) Integrate from r1 to r2:
+%
+%        G = (sigma*t/(2*pi)) * integral_{r1}^{r2} (1/r) dr
+%          = (sigma*t/(2*pi)) * [ln(r2) - ln(r1)]
+%          = (sigma*t/(2*pi)) * ln(r2/r1)
+%
+%   5) Invert:
+%
+%        R = 1/G = 2*pi / (sigma * t * ln(r2/r1))
+%
+%   Note on dropping the dr/2 term:
+%     Keeping it gives dG ~ (sigma*t/(2*pi))*(dr/r) - (sigma*t/(4*pi))*(dr^2/r^2).
+%     Summing N = (r2-r1)/dr slices, the dr^2 terms total ~dr -> 0,
+%     so only the first-order term survives.
+%
+%   Sanity check (thin ring, r2 - r1 << r1):
+%     ln(r2/r1) ~ (r2-r1)/r1, so R ~ 2*pi*r1 / (sigma*t*(r2-r1)),
+%     i.e. a straight strip of length 2*pi*r1, width (r2-r1), thickness t.
+%   ------------------------------------------------------------------
 
-    % % --- Input validation ---
-    % if n < 0
-    %     error('n must be non-negative');
-    % end
-    % if r_n <= r_0
-    %     error('Outer radius r_n must be greater than inner radius r_0');
-    % end
-    % if r_0 <= 0
-    %     error('Inner radius r_0 must be positive');
-    % end
-
-    % --- Geometry: conductor radial width per turn ---
-    % dr represents the radial width of each conductor strip,
-    % computed by distributing the total radial growth evenly across (n+1) turns.
-    % Total radial span is (r_n - r_0), divided among (n+1) conductors.
-    dr = (r_n - r_0) / (n + 1);
-
-    % --- Preallocate arrays for performance ---
-    r = zeros(1, n + 1);    % radius of each turn centerline [m]
-    R = zeros(1, n + 1);    % resistance per turn [Ohm]
-
-    % --- Compute per-turn dimensions and resistances ---
-    % Iterates over n+1 turns, indexed 0 through n (j = i - 1).
-    % Each turn is a circular trace at radius r(i).
-    % Turn centerline radii are spaced from (r_0 + dr/2) to (r_n - dr/2).
-    %
-    % Resistance formula:
-    %   R = L / (sigma * A)
-    %   L = 2 * pi * r       (circumference)
-    %   A = dr * t_cu        (cross-section area)
-    %   R = 2 * pi * r / (sig_cu * dr * t_cu)
-
-    for i = 1 : n + 1
-        j = i - 1;
-        
-        % Centerline radius of turn j (linearly spaced)
-        % First turn at r_0 + dr/2, last turn at r_n - dr/2
-        r(i) = r_0 + dr/2 + j * dr;
-        
-        % Resistance of this circular turn
-        R(i) = 2 * pi * r(i) / (sig_cu * dr * t_cu);
+    if ~(r1 > 0 && r2 > r1)
+        error('calculate_Rdc_round:badRadii', 'Require 0 < r1 < r2.');
     end
-
-    % --- Combine resistances ---
-    % All turns are combined in parallel for the equivalent winding resistance.
-    Rdc = 1 / sum(1 ./ R);
-
+    R = 2*pi ./ (sigma .* t .* log(r2 ./ r1));
 end

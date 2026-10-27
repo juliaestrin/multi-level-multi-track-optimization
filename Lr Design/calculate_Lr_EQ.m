@@ -121,7 +121,7 @@ result.R_tot    = 0.5 * R_s + R_c;
     
     result.Pv = result.P_core / Vc * 1e-3;   % [kW/m^3]
     
-    result.Rdc = calculate_Rdc_round(100, b/2 + params.s_ct, ...
+    result.Rdc = calculate_Rdc_round(b/2 + params.s_ct, ...
         b/2 + params.s_ct + w_winding, params.sigma_cu, params.t_cu_pri);
    
 
