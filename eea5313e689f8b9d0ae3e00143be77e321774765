@@ -1,0 +1,3 @@
+Transformer: added ferrite eddy-current core loss (using Fair-Rite 80 conductivity,
+sigma_1MHz) on top of Steinmetz loss in calculateVIRT_round_2LMT. P_core is now
+P_core_steinmetz + P_eddy.
