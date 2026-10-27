@@ -1,0 +1,3 @@
+Explored the smallest transformer + inductor footprint that still reaches >98% system
+efficiency: reworked TwoLevelMutliTrack_design.m (Lr design after the transformer, leakage
+inductance subtracted from Lr) and tuned the sweep script.
