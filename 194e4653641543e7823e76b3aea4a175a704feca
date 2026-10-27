@@ -1,0 +1,3 @@
+New racetrack (stadium) center-post transformer: calculateVIRT_raceTrack_2LMT,
+optimize_VIRT_raceTrack_2LMT, calculate_Rdc_raceTrack and VIRT3Dfigure_raceTrack.
+Also committed sweep_results.mat and two .asv autosave files.
