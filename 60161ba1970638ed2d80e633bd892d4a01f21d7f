@@ -1,0 +1,3 @@
+Resonant inductor (Lr): added a rectangular center-post option alongside round
+(calculate_Lr / optimize_Lr take a 'shape' parameter, with depth 'a' as a free variable),
+added calc_Lr_Temp thermal estimate, and updated Lr_3DFigure to draw both shapes.
