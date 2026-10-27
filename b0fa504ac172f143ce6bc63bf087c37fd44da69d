@@ -1,0 +1,4 @@
+Updated Fair-Rite 80 material: Fairrite80.m fits Steinmetz k/beta at 1 MHz from datasheet
+points. New EQ resonant-inductor model (calculate_Lr_EQ / optimize_Lr_EQ) with an air gap
+solved numerically including fringing, and Dowell multi-layer copper loss in
+calculate_Pcond_Lr. The design script uses optimize_Lr_EQ and a footprint <= 4 in^2 filter.
