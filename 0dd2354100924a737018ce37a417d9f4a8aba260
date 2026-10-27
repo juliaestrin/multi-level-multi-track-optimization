@@ -1,0 +1,1 @@
+Resonant inductor: added the same ferrite eddy-current core loss term to calculate_Lr.
