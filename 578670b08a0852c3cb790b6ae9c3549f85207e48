@@ -1,0 +1,4 @@
+Experimenting with k_area optimization: added a round-EQ core variant
+(calculateVIRT_roundEQ_2LMT, optimize_VIRT_roundEQ_2LMT). Note: calculateVIRT_roundEQ_2LMT
+line 5 has a typo (k_areSa), so the file doesn't run yet. The design script gained
+k_area sweep blocks for each core type (mostly commented out).
