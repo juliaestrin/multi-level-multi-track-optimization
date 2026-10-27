@@ -1,0 +1,2 @@
+Fixed the air-gap length formula for gapping all legs (center post plus outer legs in series)
+in calculateVIRT_round_2LMT and the Lr inductor optimizer. Removed stale .asv autosave files.
