@@ -57,22 +57,39 @@ function result = calculate_Lr(b, w, k_area, N, a, shape, params)
     end
 
     % Air gap
-    result.lg = params.u0 * N^2 / params.Lr * (1/(1/2 * 1/Ac_legs + 1/Ac_center));
-    R_legs    = result.lg / (params.u0 * Ac_legs);
-    R_center  = result.lg / (params.u0 * Ac_center);
-    R_tot     = 1/2 * R_legs + R_center;
+    %result.lg = params.u0 * N^2 / params.Lr * (1/(1/2 * 1/Ac_legs + 1/Ac_center));
+    result.lg = params.u0 * N^2 / (params.Lr * (1/Ac_center + 1/2*1/Ac_legs)); 
+    result.R_legs    = result.lg / (params.u0 * Ac_legs);
+    result.R_center  = result.lg / (params.u0 * Ac_center);
+    result.R_tot     = 1/2 * result.R_legs + result.R_center;
 
     % Flux densities
-    Phi_tot            = N * params.I / R_tot;
-    result.Bmax_center = Phi_tot / Ac_center;
-    result.Bmax_legs   = (Phi_tot/2) / Ac_legs;
+    result.Phi_tot            = N * params.I / result.R_tot;
+    result.Bmax_center = result.Phi_tot / Ac_center;
+    result.Bmax_legs   = (result.Phi_tot/2) / Ac_legs;
 
     % Core loss
-    result.P_core = params.k * params.f^(params.alpha) * ( ...
-        V_center           * result.Bmax_center^(params.beta) + ...
+    % result.P_core = params.k * params.f^(params.alpha) * ( ...
+    %     V_center           * result.Bmax_center^(params.beta) + ...
+    %     (V_legs + V_yokes) * result.Bmax_legs^(params.beta) );
+    % 
+    % result.Pv = result.P_core / Vc * 1e-3;
+
+    result.P_core_steinmetz = params.k * params.f^(params.alpha) * ( ...
+        V_center * result.Bmax_center^(params.beta) + ...
         (V_legs + V_yokes) * result.Bmax_legs^(params.beta) );
 
-    result.Pv = result.P_core / Vc * 1e-3;
+    sigma_1MHz = params.sigma_1MHz; 
+
+    Pv_eddy_center = (8/pi^2) * (pi/6) * sigma_1MHz * b^2 * params.f^2 * result.Bmax_center^2; 
+    P_eddy_center = Pv_eddy_center * V_center; 
+
+    Pv_eddy_legs = (8/pi^2) * (pi/6) * sigma_1MHz * w_leg^2 * params.f^2 * result.Bmax_legs^2;
+    P_eddy_legs = Pv_eddy_legs * (V_legs + V_yokes); 
+
+    result.P_eddy = P_eddy_center + P_eddy_legs; 
+
+    result.P_core = result.P_core_steinmetz + result.P_eddy; 
 
     % Winding resistance
     if strcmp(shape, 'round')

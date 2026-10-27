@@ -13,22 +13,41 @@
 %   where d = t_cu / skin_depth (normalized copper thickness).
 %
 
-function [P_cond] = calculate_Pcond_Lr(I, f, Rdc, N, t_cu, rho_cu, u0)
 
-%% Skin Depth and Normalized Copper Thickness
-skin_depth  = sqrt(rho_cu / (pi * f * u0));
-delta   = t_cu / skin_depth;
+function P_cond = calculate_Pcond_Lr(I, f, Rdc, N, t_cu, rho_cu, u0)
+% Rdc : DC resistance per layer
 
-%% Dowell Coefficients
+%% Skin depth and normalized thickness
+skin_depth = sqrt(rho_cu / (pi * f * u0));
+delta      = t_cu / skin_depth;
+
+%% Dowell coefficients
 F_delta = (sinh(2*delta) + sin(2*delta)) / (cosh(2*delta) - cos(2*delta));
 G_delta = (sinh(delta)   - sin(delta))   / (cosh(delta)   + cos(delta));
 
-    P_cond = 0; 
-    for n = 1:N 
-        
-        P_cond = 1/2* Rdc * delta * ((n*I - (n-1)*I)^2 * F_delta ...
-            + 2 * n*I * (n-1)*I * G_delta); 
-    
-    end 
+P_cond = 0.5 * I^2 * (N * Rdc) * delta * ...
+    (F_delta + (2*N^2 - 2)/3 * G_delta);
 
-end
+end 
+% function [P_cond] = calculate_Pcond_Lr(I, f, Rdc, N, t_cu, rho_cu, u0)
+% 
+% %% Skin Depth and Normalized Copper Thickness
+% skin_depth  = sqrt(rho_cu / (pi * f * u0));
+% delta   = t_cu / skin_depth;
+% 
+% %% Dowell Coefficients
+% F_delta = (sinh(2*delta) + sin(2*delta)) / (cosh(2*delta) - cos(2*delta));
+% G_delta = (sinh(delta)   - sin(delta))   / (cosh(delta)   + cos(delta));
+% 
+%     P_cond = 0; 
+%     for n = 1:N 
+% 
+%         % P_cond = 1/2* Rdc * delta * ((n*I - (n-1)*I)^2 * F_delta ...
+%         %     + 2 * n*I * (n-1)*I * G_delta); 
+% 
+%         P_cond = P_cond + 1/2* Rdc * delta * ((n*I - (n-1)*I)^2 * F_delta ...
+%             + 2 * n*I * (n-1)*I * G_delta);
+% 
+%     end 
+% 
+% end

@@ -43,10 +43,14 @@ material_name = 'F80';      % Core material selection
 
 w_max_TX = 50e-3;             % [m] max transformer width [x-direction]
 l_max_TX = 50e-3;             % [m] max allowable transformer length [y-direction]
+
+% w_max_TX = 50e-3;             % [m] max transformer width [x-direction]
+% l_max_TX = 50e-3;             % [m] max allowable transformer length [y-direction]
+
 gap_loc = 'all';           % gap location: 'center' or 'all' legs
 
-w_max_Lr = 25e-3; 
-l_max_Lr = 25e-3; 
+w_max_Lr = 32e-3; 
+l_max_Lr = 32e-3; 
 
 TX_shape = 'round';
 Lr_shape = 'rectangle'; 
@@ -55,15 +59,15 @@ Tmax = 100;
 
 % Prepreg/Core options: https://cdn.files-text.com/us-south1/api/lc/att/12933531/5ecb2f5812e859e88eaf9a75818cfc28/CN-LU-2209-S05-S1000-2M-S1000-2MB-DK.pdf
 % Thickness of pre-preg  (Glass Type: 7628, RC Nominal: 52) [m]
-h_prepreg = 0.1e-3; 
+h_prepreg = 0.103e-3; 
 % Thickness of core (ply-up: 2116+1080+2116)
-h_core = 0.1e-3;
+h_core = 0.13e-3;
 
 % --- Transformer Fixed Parameters ---
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
-s_ct = 0.5e-3;              % [m]    core to trace spacing
-
+s_ct = 1e-3;              % [m]    core to trace spacing
+sigma_1MHz = 1.363274;        % [S/m] conductivity of Fair-Rite 80
 
 h_pcb = 6*h_prepreg + 5*h_core + 12 * t_cu_pri;             % [m]    pcb height
 
@@ -168,33 +172,244 @@ design_params = struct( ...
     'sig_grease', sig_grease, ...
     'd_grease', d_grease, ...
     'gap_loc', gap_loc, ...
+    'sigma_1MHz', sigma_1MHz, ...
     'shape', Lr_shape ...
     );
 
 design_params.N_min = 1;
 design_params.N_max = 12;
+% %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
+% fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
+% 
+% % design_params.k_area = 0.5; 
+% % [x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
+% % VIRT3Dfigure_round(TX_design, material, T_tx, 0);
+% % EQ Core Optimization 
+% % --- k_area sweep ---
+% k_area_sweep  = 0.1:0.01:2;
+% P_sweep       = zeros(size(k_area_sweep));
+% results_sweep = cell(size(k_area_sweep));
+% 
+% fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+% 
+% for i = 1:numel(k_area_sweep)
+%     params_i        = design_params;
+%     params_i.k_area = k_area_sweep(i);
+% 
+%     [x_opt_i, P_opt_i, res_i] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, params_i);
+% 
+%     P_sweep(i)       = P_opt_i;
+%     results_sweep{i} = res_i;
+% 
+%     fprintf('  k_area = %.2f  →  P_total = %.2f W, A_footprint =  %.2f in^2 (b = %.1f mm, w = %.1f mm)\n', ...
+%         k_area_sweep(i), P_opt_i, res_i.A_footprint*1550, res_i.b*1e3, res_i.w*1e3);
+% end
+% 
+% % Best design
+% [P_opt_TX, idx_best] = min(P_sweep);
+% TX_design            = results_sweep{idx_best};
+% k_area_best          = k_area_sweep(idx_best);
+% 
+% fprintf('\nBest: k_area = %.2f, P_total = %.2f W, b = %.1f mm, w = %.1f mm\n', ...
+%     k_area_best, P_opt_TX, TX_design.b*1e3, TX_design.w*1e3);
+% 
+% % Plot
+% figure;
+% plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+% xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+% ylabel('P_{total} [W]');
+% title('Optimal P_{total} vs k\_area');
+% xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+% grid on;
+% 
+% if strcmp(TX_shape, 'round')
+%     VIRT3Dfigure_round(TX_design, material, TX_design.T_tx, 0);
+% else
+%     VIRT3Dfigure_square(TX_design, material, T_tx, 0);
+% end
+
 %% ---------- VIRT TRANSFORMER OPTIMIZATION ----------
 fprintf('\n--- VIRT TRANSFORMER OPTIMIZATION ---\n');
 
-[x_opt_TX, P_opt_TX, TX_design] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, design_params);
+% --- k_area sweep ---
+k_area_sweep  = 0.1:0.01:2;
+P_sweep       = zeros(size(k_area_sweep));
+results_sweep = cell(size(k_area_sweep));
+fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+for i = 1:numel(k_area_sweep)
+    params_i        = design_params;
+    params_i.k_area = k_area_sweep(i);
+    [x_opt_i, P_opt_i, res_i] = optimize_VIRT_2LMT(w_max_TX, l_max_TX, params_i);
+    P_sweep(i)       = P_opt_i;
+    results_sweep{i} = res_i;
+    fprintf('  k_area = %.2f  →  P_total = %.2f W, A_footprint =  %.2f in^2 (b = %.1f mm, w = %.1f mm)\n', ...
+        k_area_sweep(i), P_opt_i, res_i.A_footprint*1550, res_i.b*1e3, res_i.w*1e3);
+end
 
-T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
-    R_plate, Area_plate, T_water, sig_grease, d_grease);
+% Remove data points with footprint > 4 in^2
+A_footprint_in2 = cellfun(@(r) r.A_footprint * 1550, results_sweep);
+valid_mask      = A_footprint_in2 <= 4;
+k_area_sweep    = k_area_sweep(valid_mask);
+P_sweep         = P_sweep(valid_mask);
+results_sweep   = results_sweep(valid_mask);
+fprintf('Kept %d / %d points with footprint <= 4 in^2\n', sum(valid_mask), numel(valid_mask));
 
-%Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
-% Cps    = calc_Cps(TX_design);
-% f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
+% Best design
+[P_opt_TX, idx_best] = min(P_sweep);
+TX_design            = results_sweep{idx_best};
+k_area_best          = k_area_sweep(idx_best);
+fprintf('\nBest: k_area = %.2f, P_total = %.2f W, b = %.1f mm, w = %.1f mm\n', ...
+    k_area_best, P_opt_TX, TX_design.b*1e3, TX_design.w*1e3);
+
+% Plot
+figure;
+plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+ylabel('P_{total} [W]');
+title('Optimal P_{total} vs k\_area  (footprint \leq 4 in^2)');
+xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+grid on;
 
 if strcmp(TX_shape, 'round')
-    VIRT3Dfigure_round(TX_design, material, T_tx, 0);
+    VIRT3Dfigure_round(TX_design, material, TX_design.T_tx, 0);
 else
     VIRT3Dfigure_square(TX_design, material, T_tx, 0);
 end
+% % --- VIRT RACETRACK TRANSFORMER OPTIMIZATION ---
+% fprintf('\n--- VIRT RACETRACK TRANSFORMER OPTIMIZATION ---\n');
+% 
+% % --- k_area sweep ---
+% % k_area_sweep  = 0.5:0.01:0.5;
+% k_area_sweep  = 0.3:0.01:0.3;
+% P_sweep       = zeros(size(k_area_sweep));
+% results_sweep = cell(size(k_area_sweep));
+% 
+% fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+% 
+% for i = 1:numel(k_area_sweep)
+%     params_i        = design_params;
+%     params_i.k_area = k_area_sweep(i);
+%     [x_opt_i, P_opt_i, res_i] = optimize_VIRT_raceTrack_2LMT(w_max_TX, l_max_TX, params_i);
+%     P_sweep(i)       = P_opt_i;
+%     results_sweep{i} = res_i;
+%     fprintf('  k_area = %.2f  →  P_total = %.2f W, A = %.2f in^2 (a = %.1f mm, b = %.1f mm, w = %.1f mm)\n', ...
+%         k_area_sweep(i), P_opt_i, res_i.A_footprint*1550,  res_i.a*1e3, res_i.b*1e3, res_i.w*1e3);
+% end
+% 
+% % Best design
+% [P_opt_TX, idx_best] = min(P_sweep);
+% TX_design            = results_sweep{idx_best};
+% k_area_best          = k_area_sweep(idx_best);
+% 
+% fprintf('\nBest: k_area = %.2f, P_total = %.2f W, a = %.1f mm, b = %.1f mm, w = %.1f mm\n', ...
+%     k_area_best, P_opt_TX, TX_design.a*1e3, TX_design.b*1e3, TX_design.w*1e3);
+% 
+% % Plot
+% figure;
+% plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+% xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+% ylabel('P_{total} [W]');
+% title('Optimal P_{total} vs k\_area  [Racetrack VIRT]');
+% xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+% grid on;
+
+
+% --- VIRT PQ TRANSFORMER OPTIMIZATION ---
+% fprintf('\n--- VIRT RACETRACK TRANSFORMER OPTIMIZATION ---\n');
+% 
+% % --- k_area sweep ---
+% % k_area_sweep  = 0.5:0.01:0.5;
+% k_area_sweep  = 0.1:0.01:2;
+% P_sweep       = zeros(size(k_area_sweep));
+% results_sweep = cell(size(k_area_sweep));
+% 
+% fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+% 
+% for i = 1:numel(k_area_sweep)
+%     params_i        = design_params;
+%     params_i.k_area = k_area_sweep(i);
+%     [x_opt_i, P_opt_i, res_i] = optimize_VIRT_PQ_2LMT(w_max_TX, l_max_TX, params_i);
+%     P_sweep(i)       = P_opt_i;
+%     results_sweep{i} = res_i;
+%     fprintf('  k_area = %.2f  →  P_total = %.2f W, A = %.2f in^2 (a = %.1f mm, b = %.1f mm, w = %.1f mm)\n', ...
+%         k_area_sweep(i), P_opt_i, res_i.A_footprint*1550,  res_i.a*1e3, res_i.b*1e3, res_i.w*1e3);
+% end
+% 
+% % Best design
+% [P_opt_TX, idx_best] = min(P_sweep);
+% TX_design            = results_sweep{idx_best};
+% k_area_best          = k_area_sweep(idx_best);
+% 
+% fprintf('\nBest: k_area = %.2f, P_total = %.2f W, a = %.1f mm, b = %.1f mm, w = %.1f mm\n', ...
+%     k_area_best, P_opt_TX, TX_design.a*1e3, TX_design.b*1e3, TX_design.w*1e3);
+% 
+% % Plot
+% figure;
+% plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+% xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+% ylabel('P_{total} [W]');
+% title('Optimal P_{total} vs k\_area  [Racetrack VIRT]');
+% xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+% grid on;
+% T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
+%     R_plate, Area_plate, T_water, sig_grease, d_grease);
+
+%VIRT3Dfigure_raceTrack(TX_design, material, T_tx, 0)
+
+
+% --- VIRT Round EQ TRANSFORMER OPTIMIZATION ---
+% fprintf('\n--- VIRT Round EQ TRANSFORMER OPTIMIZATION ---\n');
+% 
+% % --- k_area sweep ---
+% k_area_sweep  = 0.5:0.01:0.5;
+% % k_area_sweep  = 0.1:0.01:2;
+% P_sweep       = zeros(size(k_area_sweep));
+% results_sweep = cell(size(k_area_sweep));
+% 
+% fprintf('Sweeping k_area (%d points)...\n', numel(k_area_sweep));
+% 
+% for i = 1:numel(k_area_sweep)
+%     params_i        = design_params;
+%     params_i.k_area = k_area_sweep(i);
+%     [x_opt_i, P_opt_i, res_i] = optimize_VIRT_PQ_2LMT(w_max_TX, l_max_TX, params_i);
+%     P_sweep(i)       = P_opt_i;
+%     results_sweep{i} = res_i;
+%     fprintf('  k_area = %.2f  →  P_total = %.2f W, A = %.2f in^2 (a = %.1f mm, b = %.1f mm, w = %.1f mm)\n', ...
+%         k_area_sweep(i), P_opt_i, res_i.A_footprint*1550,  res_i.a*1e3, res_i.b*1e3, res_i.w*1e3);
+% end
+% 
+% % Best design
+% [P_opt_TX, idx_best] = min(P_sweep);
+% TX_design            = results_sweep{idx_best};
+% k_area_best          = k_area_sweep(idx_best);
+% 
+% fprintf('\nBest: k_area = %.2f, P_total = %.2f W, a = %.1f mm, b = %.1f mm, w = %.1f mm\n', ...
+%     k_area_best, P_opt_TX, TX_design.a*1e3, TX_design.b*1e3, TX_design.w*1e3);
+% 
+% % Plot
+% figure;
+% plot(k_area_sweep, P_sweep, 'b-o', 'MarkerFaceColor', 'b');
+% xlabel('k\_area  (A_{c,legs} / A_{c,center})');
+% ylabel('P_{total} [W]');
+% title('Optimal P_{total} vs k\_area  [Racetrack VIRT]');
+% xline(k_area_best, 'r--', sprintf('best: k\\_area = %.2f', k_area_best));
+% grid on;
+% T_tx = calculate_transformer_temp(TX_design.P_total, TX_design.Ac_center, TX_design.h_w, ...
+%     R_plate, Area_plate, T_water, sig_grease, d_grease);
+% %Llk_TX = calc_Llk(design_params, TX_design, h_prepreg, h_core) 
+% % Cps    = calc_Cps(TX_design);
+% % f_res  = 1 / (2 * pi * sqrt(Cps * Llk));
+
+
 
 %% Lr Design 
-design_params.Lr = design_params.Lr - calc_Llk(design_params, TX_design, h_prepreg, h_core); 
-[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
+design_params.Bsat = 300e-3; 
+design_params.s_ct = 0.5e-3; 
+design_params.Lr = Llk - calc_Llk(design_params, TX_design, h_prepreg, h_core); 
+%[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr(w_max_Lr, l_max_Lr, design_params);
 
+[x_opt_Lr, P_opt_Lr, Lr_design] = optimize_Lr_EQ(w_max_Lr, l_max_Lr, design_params);
+Lr_design.shape = "round"; 
 Lr_3DFigure(Lr_design)
 
 %% ---------- PRIMARY SIDE SWITCH ANALYSIS ----------
@@ -241,7 +456,7 @@ fprintf('====================================================\n');
 
 fprintf('\n--- Transformer Summary ---\n');
 fprintf('  Volume:      %.4f cm^3\n', TX_design.Vc * 1e6);
-fprintf('  Temperature: %.2f C\n',    T_tx);
+fprintf('  Temperature: %.2f C\n',    TX_design.T_tx);
 fprintf('  Core loss:   %.2f W\n',    TX_design.P_core);
 fprintf('  Copper loss: %.2f W\n',    TX_design.P_pri + TX_design.P_sec);
 

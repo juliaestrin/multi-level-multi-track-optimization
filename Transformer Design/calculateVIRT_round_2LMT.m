@@ -63,15 +63,25 @@ function result = calculateVIRT_round_2LMT(b, w, k_area, params)
     % result.Bmax_center = 2*params.Vo / (4*params.f * Ac_center);
     % result.Bmax_legs   = 2*params.Vo / (4*params.f * 2 * Ac_legs);   % legs + yokes
     
-   result.Bmax_center = params.Vin / (8 * 8 *params.f * Ac_center);
+    result.Bmax_center = params.Vin / (8 * 8 *params.f * Ac_center);
     result.Bmax_legs   = params.Vin / (8 * 8 *params.f * 2 * Ac_legs);   % legs + yokes
 
-    
-
-    % Core loss — each region at its own Bmax
-    result.P_core = params.k * params.f^(params.alpha) * ( ...
+    % Steinmetz Core loss — each region at its own Bmax
+    result.P_core_steinmetz = params.k * params.f^(params.alpha) * ( ...
         V_center * result.Bmax_center^(params.beta) + ...
         (V_legs + V_yokes) * result.Bmax_legs^(params.beta) );
+    
+    sigma_1MHz = params.sigma_1MHz; 
+
+    Pv_eddy_center = (8/pi^2) * (pi/4) * sigma_1MHz * Ac_center * params.f^2 * result.Bmax_center^2; 
+    P_eddy_center = Pv_eddy_center * V_center; 
+
+    Pv_eddy_legs = (8/pi^2) * (pi/6) * sigma_1MHz * w_leg^2 * params.f^2 * result.Bmax_legs^2;
+    P_eddy_legs = Pv_eddy_legs * (V_legs + V_yokes); 
+    
+    result.P_eddy = P_eddy_center + P_eddy_legs; 
+
+    result.P_core = result.P_core_steinmetz + result.P_eddy; 
     
     result.Pv = result.P_core / Vc * 1e-3;   % [kW/m^3]
     
