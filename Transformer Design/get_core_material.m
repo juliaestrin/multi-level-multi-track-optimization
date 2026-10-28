@@ -48,6 +48,7 @@ function params = get_core_material(material_name)
             params.alpha = 2.15651264669503;
             params.uc   = 600;
             params.Bsat = 0.3; % [T]
+            params.sigma_1MHz = 1.363274; % [S/m] conductivity of Fair-Rite 80
             params.name = 'Fairite 80';
         
               

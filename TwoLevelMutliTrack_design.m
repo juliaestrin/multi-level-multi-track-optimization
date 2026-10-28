@@ -64,7 +64,7 @@ h_core = 0.13e-3;
 t_cu_pri    = 2 * 35e-6;    % [m]    Primary copper thickness (2 oz)
 t_cu_sec    = 2 * 35e-6;    % [m]    Secondary copper thickness (2 oz)
 s_ct = 1e-3;              % [m]    core to trace spacing
-sigma_1MHz = 1.363274;        % [S/m] conductivity of Fair-Rite 80
+
 
 h_pcb = 6*h_prepreg + 5*h_core + 12 * t_cu_pri;             % [m]    pcb height
 
@@ -106,6 +106,7 @@ beta  = material.beta;
 alpha = material.alpha;
 uc    = material.uc;
 Bsat  = material.Bsat;
+sigma_1MHz = material.sigma_1MHz; 
 
 fprintf('Core Material: %s\n', material.name);
 fprintf('  k:                %.4e\n', k);
